@@ -68,7 +68,7 @@ div.content-wrapper {
 /* Proof body initially hidden, shown via JS when proof toggle is expanded */
 /* Using max-height/opacity for smooth animation instead of display:none */
 .lean-proof-body {
-  display: inline;
+  display: block;  /* block respects max-height for proper collapse */
   max-height: 0;
   opacity: 0;
   overflow: hidden;
