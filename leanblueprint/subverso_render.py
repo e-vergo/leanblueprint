@@ -172,6 +172,12 @@ def _render_token(token: dict) -> str:
     content = token.get("content", "")
 
     css_class = _token_class(kind)
+
+    # For unknown/text tokens, apply lexical highlighting (numbers, operators, etc.)
+    # and return directly without wrapping in lean-text span
+    if css_class == "lean-text":
+        return _highlight_plain_text(content)
+
     escaped_content = html_escape(content)
 
     # Check for sorry - special handling
