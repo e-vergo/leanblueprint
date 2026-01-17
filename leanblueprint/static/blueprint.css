@@ -14,9 +14,10 @@ div.content-wrapper {
 .sbs-container {
   display: grid;
   grid-template-columns: 75ch 1fr;  /* Standard blueprint width for LaTeX, rest for Lean */
-  gap: 2rem;
+  gap: 3rem;  /* Gap between LaTeX and Lean columns */
   align-items: start;
   margin-bottom: 3rem;  /* Vertical spacing between declarations */
+  margin-left: 3rem;  /* Match gap from sidebar */
 }
 
 .sbs-latex-column,
