@@ -109,18 +109,19 @@ name: sbs-script
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.sbs-container').forEach(function(container) {
-    var proofContent = container.querySelector('.proof_content');
+    var expandIcon = container.querySelector('.expand-proof');
     var leanProofBody = container.querySelector('.lean-proof-body');
 
-    if (!proofContent || !leanProofBody) return;
+    if (!expandIcon || !leanProofBody) return;
 
-    // Watch for plastex.js changing proof visibility
+    // Watch for plastex.js changing the expand icon text (▶ ↔ ▼)
     var observer = new MutationObserver(function() {
-      var isVisible = window.getComputedStyle(proofContent).display !== 'none';
-      leanProofBody.style.display = isVisible ? 'inline' : 'none';
+      // ▼ means expanded, ▶ means collapsed
+      var isExpanded = expandIcon.textContent.trim() === '▼';
+      leanProofBody.style.display = isExpanded ? 'inline' : 'none';
     });
 
-    observer.observe(proofContent, { attributes: true, attributeFilter: ['style'] });
+    observer.observe(expandIcon, { childList: true, characterData: true, subtree: true });
   });
 });
 </script>
