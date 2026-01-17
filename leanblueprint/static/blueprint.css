@@ -5,6 +5,11 @@ a.github_link {
   color: inherit;
 }
 
+/* Override plasTeX default narrow content width for side-by-side layout */
+div.content-wrapper {
+  max-width: 1400px;  /* Much wider than default 75ch */
+}
+
 /* Side-by-Side Grid Layout */
 .sbs-statement-grid,
 .sbs-proof-grid {
