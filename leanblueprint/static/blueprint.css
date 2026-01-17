@@ -13,7 +13,7 @@ div.content-wrapper {
 /* Side-by-side container for theorem/definition + Lean code */
 .sbs-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 75ch 1fr;  /* Standard blueprint width for LaTeX, rest for Lean */
   gap: 2rem;
   align-items: start;
   margin-bottom: 3rem;  /* Vertical spacing between declarations */

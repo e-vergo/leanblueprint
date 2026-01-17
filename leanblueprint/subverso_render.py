@@ -87,6 +87,46 @@ def _highlight_plain_text(text: str) -> str:
     return result
 
 
+def _renumber_brackets_by_depth(html: str) -> str:
+    """
+    Post-process HTML to renumber bracket spans based on actual nesting depth.
+
+    This fixes the issue where brackets in separate SubVerso tokens all get depth 1
+    because the depth counter resets for each token.
+    """
+    # Pattern to match bracket spans: <span class="lean-bracket-X">Y</span>
+    bracket_span_pattern = re.compile(r'<span class="lean-bracket-\d+">(.)</span>')
+
+    result = []
+    depth = 0
+    last_end = 0
+
+    for match in bracket_span_pattern.finditer(html):
+        # Add text before this match
+        result.append(html[last_end:match.start()])
+
+        bracket_char = match.group(1)
+
+        if bracket_char in OPENING_BRACKETS:
+            depth += 1
+            color_index = ((depth - 1) % 6) + 1
+            result.append(f'<span class="lean-bracket-{color_index}">{bracket_char}</span>')
+        elif bracket_char in CLOSING_BRACKETS:
+            color_index = ((depth - 1) % 6) + 1 if depth > 0 else 1
+            result.append(f'<span class="lean-bracket-{color_index}">{bracket_char}</span>')
+            depth = max(0, depth - 1)
+        else:
+            # Not a bracket we recognize, keep original
+            result.append(match.group(0))
+
+        last_end = match.end()
+
+    # Add remaining text after last match
+    result.append(html[last_end:])
+
+    return ''.join(result)
+
+
 def render_highlighted(highlighted_json: str) -> str:
     """
     Convert SubVerso Highlighted JSON string to syntax-highlighted HTML.
@@ -98,7 +138,9 @@ def render_highlighted(highlighted_json: str) -> str:
         HTML string with syntax highlighting via CSS classes.
     """
     data = json.loads(highlighted_json)
-    return _render_node(data)
+    html = _render_node(data)
+    # Post-process to fix bracket depth across token boundaries
+    return _renumber_brackets_by_depth(html)
 
 
 def render_highlighted_base64(encoded: str) -> str:
