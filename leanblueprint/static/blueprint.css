@@ -86,26 +86,26 @@ div.content-wrapper {
   display: none;
 }
 
-/* SubVerso Lean Syntax Highlighting */
-.lean-keyword { color: #8959a8; font-weight: bold; }
-.lean-const { color: #4271ae; }
+/* SubVerso Lean Syntax Highlighting - VSCode-inspired colors */
+.lean-keyword { color: #0000ff; }  /* Blue - keywords like def, theorem, if, then */
+.lean-const { color: #795e26; }  /* Brown/gold - constants and functions */
 .lean-const.lean-def { font-weight: bold; }
-.lean-var { color: #c82829; }
-.lean-string { color: #718c00; }
-.lean-option { color: #eab700; }
-.lean-docstring { color: #8e908c; font-style: italic; }
-.lean-sort { color: #3e999f; }
-.lean-level { color: #f5871f; }
-.lean-module { color: #4271ae; }
+.lean-var { color: #001080; }  /* Dark blue - local variables */
+.lean-string { color: #a31515; }  /* Red - string literals */
+.lean-option { color: #795e26; }
+.lean-docstring { color: #008000; font-style: italic; }  /* Green - doc comments */
+.lean-sort { color: #267f99; }  /* Teal - Type, Prop, Sort */
+.lean-level { color: #098658; }  /* Green - universe levels */
+.lean-module { color: #795e26; }
 .lean-expr { color: inherit; }
 .lean-text { color: inherit; }
-.lean-sorry { color: #c82829; background-color: #ffeaea; font-weight: bold; }
+.lean-sorry { color: #ff0000; background-color: #ffeaea; font-weight: bold; }
 
 /* Lexical token highlighting (regex-based) */
-.lean-number { color: #f5871f; }
-.lean-operator { color: #8959a8; }
-.lean-bracket { color: #4d4d4c; }
-.lean-comment { color: #8e908c; font-style: italic; }
+.lean-number { color: #098658; }  /* Green - numbers */
+.lean-operator { color: #000000; }  /* Black - operators */
+.lean-bracket { color: #000000; }  /* Black - brackets */
+.lean-comment { color: #008000; font-style: italic; }  /* Green - comments */
 
 /* Message spans */
 .lean-span { }
