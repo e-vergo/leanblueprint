@@ -5,3 +5,161 @@ a.github_link {
   color: inherit;
 }
 
+/* Side-by-side container for LaTeX + Lean source */
+.side-by-side-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.side-by-side-container > .latex-panel {
+  flex: 1 1 50%;
+  min-width: 300px;
+}
+
+.side-by-side-container > .lean-source-panel {
+  flex: 1 1 45%;
+  min-width: 300px;
+}
+
+/* Lean source panel */
+.lean-source-panel {
+  background-color: #f8f9fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.lean-source-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #f1f3f5;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.lean-source-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.lean-github-link {
+  font-size: 0.85rem;
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.lean-github-link:hover {
+  text-decoration: underline;
+}
+
+.lean-source-panel pre.lean-code {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Consolas', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background-color: #ffffff;
+}
+
+.lean-source-panel pre.lean-code code {
+  font-family: inherit;
+}
+
+/* SubVerso Lean Syntax Highlighting */
+.lean-keyword { color: #8959a8; font-weight: bold; }
+.lean-const { color: #4271ae; }
+.lean-const.lean-def { font-weight: bold; }
+.lean-var { color: #c82829; }
+.lean-string { color: #718c00; }
+.lean-option { color: #eab700; }
+.lean-docstring { color: #8e908c; font-style: italic; }
+.lean-sort { color: #3e999f; }
+.lean-level { color: #f5871f; }
+.lean-module { color: #4271ae; }
+.lean-expr { color: inherit; }
+.lean-text { color: inherit; }
+.lean-sorry { color: #c82829; background-color: #ffeaea; font-weight: bold; }
+
+/* Message spans */
+.lean-span { }
+.lean-error { text-decoration: wavy underline #c82829; }
+.lean-warning { text-decoration: wavy underline #eab700; }
+.lean-info { text-decoration: underline dotted #4271ae; }
+
+/* Point markers */
+.lean-point { display: inline-block; width: 0; height: 0; }
+.lean-point-error::before { content: "●"; color: #c82829; font-size: 0.7em; }
+.lean-point-warning::before { content: "●"; color: #eab700; font-size: 0.7em; }
+.lean-point-info::before { content: "●"; color: #4271ae; font-size: 0.7em; }
+
+/* Goals display */
+.lean-tactic { cursor: pointer; }
+.lean-goals {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+.lean-goal {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+.lean-goal:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.lean-goal-header {
+  color: #666;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.lean-hypotheses {
+  margin-left: 8px;
+}
+.lean-hypothesis {
+  margin: 2px 0;
+}
+.lean-hyp-names { color: #c82829; }
+.lean-hyp-colon { color: #666; }
+.lean-conclusion {
+  margin-top: 4px;
+}
+.lean-turnstile {
+  color: #666;
+  margin-right: 4px;
+}
+.lean-goal-message {
+  color: #718c00;
+  font-style: italic;
+}
+
+/* Error rendering */
+.lean-render-error {
+  color: #c82829;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .side-by-side-container {
+    flex-direction: column;
+  }
+
+  .side-by-side-container > .latex-panel,
+  .side-by-side-container > .lean-source-panel {
+    flex: 1 1 100%;
+    min-width: auto;
+  }
+}
+

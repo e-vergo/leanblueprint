@@ -19,6 +19,7 @@ from plasTeX import Command
 from plasTeX.Logging import getLogger
 from plasTeX.PackageResource import PackageCss, PackageTemplateDir
 from plastexdepgraph.Packages.depgraph import item_kind
+from leanblueprint.subverso_render import render_highlighted_base64
 
 log = getLogger()
 
@@ -118,6 +119,33 @@ class discussion(Command):
             'issue', self.attributes['issue'].lstrip('#').strip())
 
 
+class leansource(Command):
+    r"""\leansource{base64_encoded_json}"""
+    args = 'source:str'
+
+    def digest(self, tokens):
+        Command.digest(self, tokens)
+        # Store base64-encoded SubVerso JSON for later rendering
+        self.parentNode.setUserData('leansource_base64', self.attributes['source'])
+
+
+class leanposition(Command):
+    r"""\leanposition{file|startLine|startCol|endLine|endCol}"""
+    args = 'position:str'
+
+    def digest(self, tokens):
+        Command.digest(self, tokens)
+        parts = self.attributes['position'].split('|')
+        if len(parts) == 5:
+            self.parentNode.setUserData('leanposition', {
+                'file': parts[0],
+                'startLine': int(parts[1]),
+                'startCol': int(parts[2]),
+                'endLine': int(parts[3]),
+                'endCol': int(parts[4])
+            })
+
+
 CHECKMARK_TPL = Template("""
     {% if obj.userdata.leanok and ('proved_by' not in obj.userdata or obj.userdata.proved_by.userdata.leanok ) %}
     ✓
@@ -164,6 +192,20 @@ GITHUB_LINK_TPL = Template("""
   {% if thm.userdata['issue'] -%}
   <a class="issue_link" href="{{ document.userdata['project_github'] }}/issues/{{ thm.userdata['issue'] }}">Discussion</a>
   {%- endif -%}
+""")
+
+LEAN_SOURCE_TPL = Template("""
+{% if obj.userdata.lean_source_html %}
+<div class="lean-source-panel">
+    <div class="lean-source-header">
+        <span class="lean-source-title">Lean Source</span>
+        {% if obj.userdata.lean_github_permalink %}
+        <a href="{{ obj.userdata.lean_github_permalink }}" class="lean-github-link" target="_blank" rel="noopener">View on GitHub</a>
+        {% endif %}
+    </div>
+    <pre class="lean-code"><code>{{ obj.userdata.lean_source_html | safe }}</code></pre>
+</div>
+{% endif %}
 """)
 
 
@@ -213,6 +255,31 @@ def ProcessOptions(options, document):
                          f'{project_dochome}/find/#doc/{leandecl}'))
 
                 node.userdata['lean_urls'] = lean_urls
+
+                # Process leansource_base64: render SubVerso JSON to HTML
+                if node.userdata.get('leansource_base64'):
+                    try:
+                        node.userdata['lean_source_html'] = render_highlighted_base64(
+                            node.userdata['leansource_base64']
+                        )
+                    except Exception as e:
+                        log.warning(f'Error rendering Lean source for {node}: {e}')
+                        node.userdata['lean_source_html'] = f'<span class="lean-render-error">Error rendering: {e}</span>'
+
+                # Process leanposition: build GitHub permalink
+                if node.userdata.get('leanposition'):
+                    pos = node.userdata['leanposition']
+                    project_github = document.userdata.get('project_github')
+                    if project_github:
+                        # Use the file path directly; it's relative to the project root
+                        file_path = pos['file']
+                        # Build permalink with line range
+                        # Default to 'main' branch - this could be made configurable
+                        branch = 'main'
+                        node.userdata['lean_github_permalink'] = (
+                            f"{project_github}/blob/{branch}/{file_path}"
+                            f"#L{pos['startLine']}-L{pos['endLine']}"
+                        )
 
                 used = node.userdata.get('uses', [])
                 node.userdata['can_state'] = all(thm.userdata.get('leanok')
@@ -321,3 +388,6 @@ def ProcessOptions(options, document):
                                                                              GITHUB_ISSUE_TPL])
     document.userdata['dep_graph'].setdefault('extra_modal_links_tpl', []).extend([
         LEAN_LINKS_TPL, GITHUB_LINK_TPL])
+
+    # Register Lean source panel template for side-by-side display
+    document.userdata.setdefault('thm_body_extras_tpl', []).extend([LEAN_SOURCE_TPL])
