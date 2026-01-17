@@ -17,7 +17,7 @@ from pathlib import Path
 from jinja2 import Template
 from plasTeX import Command
 from plasTeX.Logging import getLogger
-from plasTeX.PackageResource import PackageCss, PackageTemplateDir
+from plasTeX.PackageResource import PackageCss, PackageJs, PackageTemplateDir
 from plastexdepgraph.Packages.depgraph import item_kind
 from leanblueprint.subverso_render import render_highlighted_base64
 import re

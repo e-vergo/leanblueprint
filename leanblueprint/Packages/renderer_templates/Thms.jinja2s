@@ -79,6 +79,26 @@ name: thmenv
   </div>
   {% endif %}
 </div>
+{% if obj.userdata.lean_proof_html and obj.userdata.proved_by %}
+<script>
+(function() {
+  var container = document.getElementById('{{ obj.id }}');
+  if (!container) return;
+  var proofHeading = container.querySelector('.proof_heading');
+  var leanProofBody = container.querySelector('.lean-proof-body');
+  if (!proofHeading || !leanProofBody) return;
+
+  proofHeading.addEventListener('click', function() {
+    // Read icon state after plastex.js has toggled it
+    setTimeout(function() {
+      var icon = container.querySelector('.expand-proof');
+      var isExpanded = icon && icon.textContent.trim() === '▼';
+      leanProofBody.style.display = isExpanded ? 'inline' : 'none';
+    }, 50);
+  });
+})();
+</script>
+{% endif %}
 
 name: proof
 {% macro icon(icon, id='', class='') %}
