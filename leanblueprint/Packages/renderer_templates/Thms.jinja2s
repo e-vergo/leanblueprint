@@ -50,6 +50,25 @@ name: thmenv
     {% endfor %}
     </div>
     {% endif %}
+    {# Render proof inline if this theorem has one #}
+    {% if obj.userdata.proved_by %}
+    {% set proof_obj = obj.userdata.proved_by %}
+    <div class="proof_wrapper proof_inline" id="{{ proof_obj.id }}">
+      <div class="proof_heading">
+        <span class="proof_caption">
+        {% if proof_obj.caption %}
+        {{ proof_obj.caption }}
+        {% else %}
+        {{ context.terms['proof'] }}
+        {% endif %}
+        </span>
+        <span class="expand-proof">{{ doc.userdata.get('expand-proof_default_content', '▼') }}</span>
+      </div>
+      <div class="proof_content">
+      {{ proof_obj }}
+      </div>
+    </div>
+    {% endif %}
   </div>
   {% if obj.userdata.lean_signature_html %}
   <div class="sbs-lean-column">
@@ -65,6 +84,7 @@ name: proof
 {% macro icon(icon, id='', class='') %}
 <svg  {% if id %}id="{{id}}" {% endif %}class="icon icon-{{ icon }} {{ class }}"><use xlink:href="symbol-defs.svg#icon-{{ icon }}"></use></svg>
 {% endmacro %}
+{% if not obj.userdata.get('rendered_inline') %}
 <div class="proof_wrapper" id="{{ obj.id }}">
   <div class="proof_heading">
     <span class="proof_caption">
@@ -80,6 +100,7 @@ name: proof
   {{ obj }}
   </div>
 </div>
+{% endif %}
 
 name: qedhere qed
 <span class="qed">□</span>

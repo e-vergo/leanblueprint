@@ -440,6 +440,12 @@ def ProcessOptions(options, document):
                     if proof:
                         proof.userdata['lean_proof_from_parent'] = node.userdata['lean_proof_html']
 
+            # Mark proofs that have a parent theorem - they'll be rendered inline
+            for node in nodes:
+                proof = node.userdata.get('proved_by')
+                if proof:
+                    proof.userdata['rendered_inline'] = True
+
             for node in nodes:
                 node.userdata['fully_proved'] = all(n.userdata.get('proved', False) or item_kind(
                     n) == 'definition' for n in graph.ancestors(node).union({node}))
