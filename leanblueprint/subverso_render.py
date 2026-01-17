@@ -50,6 +50,31 @@ def _highlight_brackets_with_depth(text: str) -> str:
     return ''.join(result)
 
 
+def _apply_patterns_outside_tags(html: str, patterns: list) -> str:
+    """
+    Apply regex patterns only to text outside HTML tags.
+    This prevents matching digits/operators inside class names like 'lean-bracket-1'.
+    """
+    # Split by HTML tags, keeping the tags as separators
+    # Pattern matches <tag...> or </tag>
+    tag_pattern = re.compile(r'(<[^>]+>)')
+    parts = tag_pattern.split(html)
+
+    result = []
+    for part in parts:
+        if part.startswith('<') and part.endswith('>'):
+            # This is an HTML tag, don't modify it
+            result.append(part)
+        else:
+            # This is text content, apply patterns
+            modified = part
+            for pattern, css_class in patterns:
+                modified = re.sub(pattern, rf'<span class="{css_class}">\1</span>', modified)
+            result.append(modified)
+
+    return ''.join(result)
+
+
 def _highlight_plain_text(text: str) -> str:
     """
     Apply regex-based highlighting to plain text for lexical tokens
@@ -57,9 +82,8 @@ def _highlight_plain_text(text: str) -> str:
     """
     # First highlight brackets (handles depth tracking)
     result = _highlight_brackets_with_depth(text)
-    # Then apply other lexical patterns
-    for pattern, css_class in LEXICAL_PATTERNS:
-        result = re.sub(pattern, rf'<span class="{css_class}">\1</span>', result)
+    # Then apply other lexical patterns, but only to text outside HTML tags
+    result = _apply_patterns_outside_tags(result, LEXICAL_PATTERNS)
     return result
 
 
