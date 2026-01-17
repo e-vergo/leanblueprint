@@ -194,6 +194,24 @@ class leansource(Command):
         self.parentNode.setUserData('leansource_base64', self.attributes['source'])
 
 
+class leansignaturesource(Command):
+    r"""\leansignaturesource{base64_encoded_json}"""
+    args = 'source:str'
+
+    def digest(self, tokens):
+        Command.digest(self, tokens)
+        self.parentNode.setUserData('leansignature_base64', self.attributes['source'])
+
+
+class leanproofsource(Command):
+    r"""\leanproofsource{base64_encoded_json}"""
+    args = 'source:str'
+
+    def digest(self, tokens):
+        Command.digest(self, tokens)
+        self.parentNode.setUserData('leanproof_base64', self.attributes['source'])
+
+
 class leanposition(Command):
     r"""\leanposition{file|startLine|startCol|endLine|endCol}"""
     args = 'position:str'
@@ -347,6 +365,26 @@ def ProcessOptions(options, document):
                     except Exception as e:
                         log.warning(f'Error rendering Lean source for {node}: {e}')
                         node.userdata['lean_source_html'] = f'<span class="lean-render-error">Error rendering: {e}</span>'
+
+                # Process leansignature_base64: render SubVerso-highlighted signature to HTML
+                # This is the preferred path when available (from new LeanArchitect)
+                if node.userdata.get('leansignature_base64'):
+                    try:
+                        node.userdata['lean_signature_html'] = render_highlighted_base64(
+                            node.userdata['leansignature_base64']
+                        )
+                    except Exception as e:
+                        log.warning(f'Error rendering Lean signature for {node}: {e}')
+
+                # Process leanproof_base64: render SubVerso-highlighted proof body to HTML
+                # This is the preferred path when available (from new LeanArchitect)
+                if node.userdata.get('leanproof_base64'):
+                    try:
+                        node.userdata['lean_proof_html'] = render_highlighted_base64(
+                            node.userdata['leanproof_base64']
+                        )
+                    except Exception as e:
+                        log.warning(f'Error rendering Lean proof body for {node}: {e}')
 
                 # Process leanposition: build GitHub permalink and fallback source display
                 if node.userdata.get('leanposition'):
