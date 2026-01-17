@@ -87,17 +87,21 @@ name: qedhere qed
 name: sbs-script
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Sync Lean proof body visibility with LaTeX proof toggle
+  // plastex.js uses slideToggle and changes the icon ▶/▼
   document.querySelectorAll('.expand-proof').forEach(function(toggle) {
     toggle.addEventListener('click', function() {
       var wrapper = toggle.closest('.sbs-container');
       if (wrapper) {
         var proofBody = wrapper.querySelector('.lean-proof-body');
         if (proofBody) {
-          var proofContent = wrapper.querySelector('.proof_content');
-          if (proofContent) {
-            var isHidden = proofContent.style.display === 'none' || getComputedStyle(proofContent).display === 'none';
-            proofBody.style.display = isHidden ? 'inline' : 'none';
-          }
+          // Use setTimeout to check icon state AFTER plastex.js toggles it
+          setTimeout(function() {
+            var icon = toggle.textContent || toggle.innerText;
+            // ▼ means proof is now expanded -> show Lean proof body
+            // ▶ means proof is now collapsed -> hide Lean proof body
+            proofBody.style.display = (icon.trim() === '▼') ? 'inline' : 'none';
+          }, 50);
         }
       }
     });
