@@ -108,24 +108,19 @@ name: qedhere qed
 name: sbs-script
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Sync Lean proof body visibility with LaTeX proof toggle
-  // plastex.js uses slideToggle and changes the icon ▶/▼
-  document.querySelectorAll('.expand-proof').forEach(function(toggle) {
-    toggle.addEventListener('click', function() {
-      var wrapper = toggle.closest('.sbs-container');
-      if (!wrapper) return;
+  document.querySelectorAll('.sbs-container').forEach(function(container) {
+    var proofContent = container.querySelector('.proof_content');
+    var leanProofBody = container.querySelector('.lean-proof-body');
 
-      var proofBody = wrapper.querySelector('.lean-proof-body');
-      if (!proofBody) return;
+    if (!proofContent || !leanProofBody) return;
 
-      // Toggle class on wrapper to track state
-      wrapper.classList.toggle('proof-expanded');
-
-      // Sync Lean code visibility with wrapper state
-      proofBody.style.display = wrapper.classList.contains('proof-expanded')
-        ? 'inline'
-        : 'none';
+    // Watch for plastex.js changing proof visibility
+    var observer = new MutationObserver(function() {
+      var isVisible = window.getComputedStyle(proofContent).display !== 'none';
+      leanProofBody.style.display = isVisible ? 'inline' : 'none';
     });
+
+    observer.observe(proofContent, { attributes: true, attributeFilter: ['style'] });
   });
 });
 </script>
