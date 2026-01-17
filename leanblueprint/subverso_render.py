@@ -46,7 +46,7 @@ def _highlight_brackets_with_depth(text: str) -> str:
             result.append(f'<span class="lean-bracket-{color_index}">{html_escape(char)}</span>')
             depth = max(0, depth - 1)
         else:
-            result.append(char)
+            result.append(html_escape(char))
     return ''.join(result)
 
 
