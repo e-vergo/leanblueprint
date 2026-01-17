@@ -101,6 +101,12 @@ div.content-wrapper {
 .lean-text { color: inherit; }
 .lean-sorry { color: #c82829; background-color: #ffeaea; font-weight: bold; }
 
+/* Lexical token highlighting (regex-based) */
+.lean-number { color: #f5871f; }
+.lean-operator { color: #8959a8; }
+.lean-bracket { color: #4d4d4c; }
+.lean-comment { color: #8e908c; font-style: italic; }
+
 /* Message spans */
 .lean-span { }
 .lean-error { text-decoration: wavy underline #c82829; }

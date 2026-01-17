@@ -9,8 +9,36 @@ The JSON format follows Lean's ToJson serialization for inductive types.
 """
 import json
 import base64
+import re
 from html import escape as html_escape
 from typing import Any, Optional
+
+
+# Regex patterns for lexical token highlighting (applied to plain text nodes)
+# Order matters: comments first to avoid highlighting inside comments
+LEXICAL_PATTERNS = [
+    # Line comments first (greedy to end of line)
+    (r'(--[^\n]*)', 'lean-comment'),
+    # Block comments (non-greedy)
+    (r'(/-[\s\S]*?-/)', 'lean-comment'),
+    # Numbers: integers, floats, hex
+    (r'\b(\d+\.?\d*(?:e[+-]?\d+)?|0x[0-9a-fA-F]+)\b', 'lean-number'),
+    # Brackets
+    (r'([\(\)\[\]\{\}⟨⟩⟦⟧«»])', 'lean-bracket'),
+    # Operators (mathematical/logical symbols)
+    (r'([→←↔∀∃∈∉⊆⊇⊂⊃∧∨¬≤≥≠∼≃≡×∘∑∏∫∂√∞∅⁻¹·λ⊕⊗⊥⊤⊢⊣])', 'lean-operator'),
+]
+
+
+def _highlight_plain_text(text: str) -> str:
+    """
+    Apply regex-based highlighting to plain text for lexical tokens
+    that SubVerso doesn't capture semantically (numbers, operators, brackets, comments).
+    """
+    result = html_escape(text)
+    for pattern, css_class in LEXICAL_PATTERNS:
+        result = re.sub(pattern, rf'<span class="{css_class}">\1</span>', result)
+    return result
 
 
 def render_highlighted(highlighted_json: str) -> str:
@@ -92,7 +120,7 @@ def _render_node(node: Any) -> str:
         # Handle wrapped format: {"text": {"str": "..."}}
         if isinstance(text_data, dict) and "str" in text_data:
             text_data = text_data["str"]
-        return html_escape(text_data)
+        return _highlight_plain_text(text_data)
 
     # seq: {"seq": [...]} or {"seq": {"highlights": [...]}}
     if "seq" in node:
@@ -116,7 +144,7 @@ def _render_node(node: Any) -> str:
 
     # unparsed: {"unparsed": "..."}
     if "unparsed" in node:
-        return html_escape(node["unparsed"])
+        return _highlight_plain_text(node["unparsed"])
 
     # Fallback: if node has content directly (for some serialization formats)
     if "kind" in node and "content" in node:
