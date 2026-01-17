@@ -373,7 +373,7 @@ def ProcessOptions(options, document):
                             f"#L{pos['startLine']}-L{pos['endLine']}"
                         )
 
-                    # Read signature source from leanposition (selectionRange - signature only)
+                    # Read signature source from leanposition (full declaration range)
                     if not node.userdata.get('lean_signature_html'):
                         try:
                             import html
@@ -382,23 +382,31 @@ def ProcessOptions(options, document):
                             end_line = pos['endLine']
                             with open(file_path, 'r', encoding='utf-8') as f:
                                 lines = f.readlines()
-                            # Extract signature lines (1-indexed in pos)
+                            # Extract full declaration lines (1-indexed in pos)
                             source_lines = lines[start_line - 1:end_line]
                             source_text = ''.join(source_lines)
 
-                            # Clean the source (strip docstrings and attributes)
-                            signature, _ = clean_lean_source(source_text)
+                            # Clean the source and split into signature and proof body
+                            signature, proof_body = clean_lean_source(source_text)
 
-                            # Basic HTML escaping
+                            # Basic HTML escaping for signature
                             escaped_signature = html.escape(signature)
                             node.userdata['lean_signature_html'] = f'<span class="lean-plain">{escaped_signature}</span>'
+
+                            # Store proof body if present (this is more reliable than leanproofposition)
+                            if proof_body:
+                                escaped_proof = html.escape(proof_body)
+                                node.userdata['lean_proof_html'] = f'<span class="lean-plain">{escaped_proof}</span>'
 
                             # Keep lean_source_html for backwards compatibility
                             node.userdata['lean_source_html'] = node.userdata['lean_signature_html']
                         except Exception as e:
                             log.warning(f'Error reading Lean signature for {node}: {e}')
 
-                # Process leanproofposition: read proof body source separately
+                # Process leanproofposition: fallback for proof body extraction
+                # NOTE: This is typically not used since clean_lean_source() above already
+                # extracts the proof body more reliably. The leanproofposition coordinates
+                # from Lean point to the declaration name end, not the actual proof start.
                 if node.userdata.get('leanproofposition'):
                     proof_pos = node.userdata['leanproofposition']
                     if not node.userdata.get('lean_proof_html'):
