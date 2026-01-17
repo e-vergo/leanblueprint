@@ -106,13 +106,13 @@ div.content-wrapper {
 .lean-operator { color: #000000; }  /* Black - operators */
 .lean-comment { color: #008000; font-style: italic; }  /* Green - comments */
 
-/* Rainbow brackets - cycle through 6 colors by nesting depth */
-.lean-bracket-1 { color: #E5C07B; }  /* Gold */
-.lean-bracket-2 { color: #C678DD; }  /* Purple */
-.lean-bracket-3 { color: #56B6C2; }  /* Cyan */
-.lean-bracket-4 { color: #61AFEF; }  /* Blue */
-.lean-bracket-5 { color: #98C379; }  /* Green */
-.lean-bracket-6 { color: #E06C75; }  /* Red/Pink */
+/* Rainbow brackets - VSCode light theme colors (One Light inspired) */
+.lean-bracket-1 { color: #B8860B; }  /* DarkGoldenrod - saturated gold */
+.lean-bracket-2 { color: #A626A4; }  /* Magenta/Purple */
+.lean-bracket-3 { color: #0184BC; }  /* Cyan */
+.lean-bracket-4 { color: #4078F2; }  /* Blue */
+.lean-bracket-5 { color: #50A14F; }  /* Green */
+.lean-bracket-6 { color: #E45649; }  /* Red */
 
 /* Message spans */
 .lean-span { }
