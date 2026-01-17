@@ -13,57 +13,50 @@ name: thmenv
       </div>
     </div>
 {% endmacro %}
-<div class="{{ obj.thmName }}_thmwrapper {% if obj.style %}theorem-style-{{ obj.style }}{% endif %}" id="{{ obj.id }}">
-  <div class="{{ obj.thmName }}_thmheading">
-    <span class="{{ obj.thmName }}_thmcaption">
-    {{ obj.caption }}
-    </span>
+<div class="{{ obj.thmName }}_thmwrapper sbs-container {% if obj.style %}theorem-style-{{ obj.style }}{% endif %}" id="{{ obj.id }}">
+  <div class="sbs-latex-column">
+    <div class="{{ obj.thmName }}_thmheading">
+      <span class="{{ obj.thmName }}_thmcaption">
+      {{ obj.caption }}
+      </span>
 	{% if obj.ref %}
-    <span class="{{obj.thmName}}_thmlabel">{{obj.ref}}</span>
-    {% endif %}
-    {% if obj.title %}
-    <span class="{{obj.thmName}}_thmtitle">{{ obj.title }}</span>
-    {% endif %}
-    {% if doc.userdata['thm_header_extras_tpl'] %}
-    <div class="thm_header_extras">
-    {% for tpl in doc.userdata['thm_header_extras_tpl'] %}
-    {% include tpl %}
-    {% endfor %}
+      <span class="{{obj.thmName}}_thmlabel">{{obj.ref}}</span>
+      {% endif %}
+      {% if obj.title %}
+      <span class="{{obj.thmName}}_thmtitle">{{ obj.title }}</span>
+      {% endif %}
+      {% if doc.userdata['thm_header_extras_tpl'] %}
+      <div class="thm_header_extras">
+      {% for tpl in doc.userdata['thm_header_extras_tpl'] %}
+      {% include tpl %}
+      {% endfor %}
+      </div>
+      {% endif %}
+      {% if doc.userdata['thm_header_hidden_extras_tpl'] %}
+      <div class="thm_header_hidden_extras">
+      {% for tpl in doc.userdata['thm_header_hidden_extras_tpl'] %}
+      {% include tpl %}
+      {% endfor %}
+      </div>
+      {% endif %}
     </div>
-    {% endif %}
-    {% if doc.userdata['thm_header_hidden_extras_tpl'] %}
-    <div class="thm_header_hidden_extras">
-    {% for tpl in doc.userdata['thm_header_hidden_extras_tpl'] %}
+    <div class="{{ obj.thmName }}_thmcontent">
+    {{ obj }}
+    </div>
+    {% if doc.userdata.get('thm_body_extras_tpl') %}
+    <div class="thm_body_extras">
+    {% for tpl in doc.userdata['thm_body_extras_tpl'] %}
     {% include tpl %}
     {% endfor %}
     </div>
     {% endif %}
   </div>
-  <div class="sbs-statement-grid">
-    <div class="sbs-latex-cell">
-      <div class="{{ obj.thmName }}_thmcontent">
-      {{ obj }}
-      </div>
-    </div>
-    {% if obj.userdata.lean_signature_html %}
-    <div class="sbs-lean-cell">
-      <div class="lean-source-panel">
-        <div class="lean-source-header">
-          <span class="lean-source-title">Lean</span>
-          {% if obj.userdata.lean_github_permalink %}
-          <a href="{{ obj.userdata.lean_github_permalink }}" class="lean-github-link" target="_blank" title="View on GitHub">{{ icon('github') }}</a>
-          {% endif %}
-        </div>
-        <pre class="lean-code"><code>{{ obj.userdata.lean_signature_html | safe }}</code></pre>
-      </div>
-    </div>
+  {% if obj.userdata.lean_signature_html %}
+  <div class="sbs-lean-column">
+    <pre class="lean-code"><code class="lean-signature">{{ obj.userdata.lean_signature_html | safe }}</code>{% if obj.userdata.lean_proof_html %}<code class="lean-proof-body">{{ obj.userdata.lean_proof_html | safe }}</code>{% endif %}</pre>
+    {% if obj.userdata.lean_github_permalink %}
+    <a href="{{ obj.userdata.lean_github_permalink }}" class="lean-github-hover" target="_blank" title="View on GitHub">{{ icon('github') }}</a>
     {% endif %}
-  </div>
-  {% if doc.userdata.get('thm_body_extras_tpl') %}
-  <div class="thm_body_extras">
-  {% for tpl in doc.userdata['thm_body_extras_tpl'] %}
-  {% include tpl %}
-  {% endfor %}
   </div>
   {% endif %}
 </div>
@@ -83,22 +76,31 @@ name: proof
     </span>
     <span class="expand-proof">{{ doc.userdata.get('expand-proof_default_content', '▼') }}</span>
   </div>
-  <div class="proof_content sbs-proof-grid">
-    <div class="sbs-latex-cell">
-    {{ obj }}
-    </div>
-    {% if obj.userdata.lean_proof_from_parent %}
-    <div class="sbs-lean-cell">
-      <div class="lean-source-panel">
-        <div class="lean-source-header">
-          <span class="lean-source-title">Lean Proof</span>
-        </div>
-        <pre class="lean-code"><code>{{ obj.userdata.lean_proof_from_parent | safe }}</code></pre>
-      </div>
-    </div>
-    {% endif %}
+  <div class="proof_content">
+  {{ obj }}
   </div>
 </div>
 
 name: qedhere qed
 <span class="qed">□</span>
+
+name: sbs-script
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.expand-proof').forEach(function(toggle) {
+    toggle.addEventListener('click', function() {
+      var wrapper = toggle.closest('.sbs-container');
+      if (wrapper) {
+        var proofBody = wrapper.querySelector('.lean-proof-body');
+        if (proofBody) {
+          var proofContent = wrapper.querySelector('.proof_content');
+          if (proofContent) {
+            var isHidden = proofContent.style.display === 'none' || getComputedStyle(proofContent).display === 'none';
+            proofBody.style.display = isHidden ? 'inline' : 'none';
+          }
+        }
+      }
+    });
+  });
+});
+</script>

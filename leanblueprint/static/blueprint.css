@@ -7,93 +7,69 @@ a.github_link {
 
 /* Override plasTeX default narrow content width for side-by-side layout */
 div.content-wrapper {
-  max-width: 1400px;  /* Much wider than default 75ch */
+  max-width: 1600px;  /* Much wider than default 75ch */
 }
 
-/* Side-by-Side Grid Layout */
-.sbs-statement-grid,
-.sbs-proof-grid {
+/* Side-by-side container for theorem/definition + Lean code */
+.sbs-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 2rem;
   align-items: start;
 }
 
-.sbs-latex-cell,
-.sbs-lean-cell {
-  min-width: 0;  /* Prevent overflow */
+.sbs-latex-column,
+.sbs-lean-column {
+  min-width: 0;
+}
+
+/* Lean code - plain styling on page background */
+.sbs-lean-column pre.lean-code {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.sbs-lean-column pre.lean-code code {
+  font-family: inherit;
+}
+
+/* GitHub link - appears on hover only */
+.sbs-lean-column {
+  position: relative;
+}
+
+.lean-github-hover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  padding: 0.25rem;
+  color: #586069;
+}
+
+.lean-github-hover:hover {
+  color: #0366d6;
+}
+
+.sbs-lean-column:hover .lean-github-hover {
+  opacity: 1;
+}
+
+/* Proof body initially hidden, shown via JS when proof toggle is expanded */
+.lean-proof-body {
+  display: none;
 }
 
 /* Hide old sequential panel */
 .thm_body_extras {
   display: none;
-}
-
-/* Side-by-side container for LaTeX + Lean source */
-.side-by-side-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.side-by-side-container > .latex-panel {
-  flex: 1 1 50%;
-  min-width: 300px;
-}
-
-.side-by-side-container > .lean-source-panel {
-  flex: 1 1 45%;
-  min-width: 300px;
-}
-
-/* Lean source panel */
-.lean-source-panel {
-  background-color: #f8f9fa;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.lean-source-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.4rem 0.75rem;
-  background-color: #f1f3f5;
-  border-bottom: 1px solid #e1e4e8;
-}
-
-.lean-source-title {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #495057;
-}
-
-.lean-github-link {
-  font-size: 0.8rem;
-  color: #0366d6;
-  text-decoration: none;
-}
-
-.lean-github-link:hover {
-  text-decoration: underline;
-}
-
-.lean-source-panel pre.lean-code {
-  margin: 0;
-  padding: 0.75rem;
-  overflow-x: auto;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  background-color: #fff;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.lean-source-panel pre.lean-code code {
-  font-family: inherit;
 }
 
 /* SubVerso Lean Syntax Highlighting */
@@ -174,4 +150,3 @@ div.content-wrapper {
   color: #c82829;
   font-style: italic;
 }
-
