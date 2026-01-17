@@ -406,12 +406,27 @@ def ProcessOptions(options, document):
                             import html
                             file_path = proof_pos['file']
                             start_line = proof_pos['startLine']
+                            start_col = proof_pos['startCol']
                             end_line = proof_pos['endLine']
+                            end_col = proof_pos['endCol']
                             with open(file_path, 'r', encoding='utf-8') as f:
                                 lines = f.readlines()
-                            # Extract proof body lines (1-indexed)
-                            proof_lines = lines[start_line - 1:end_line]
-                            proof_text = ''.join(proof_lines).strip()
+                            # Extract proof body using column positions (1-indexed lines, 0-indexed cols)
+                            if start_line == end_line:
+                                # Single line: extract from startCol to endCol
+                                proof_text = lines[start_line - 1][start_col:end_col]
+                            else:
+                                # Multi-line: first line from startCol, middle lines full, last line to endCol
+                                proof_parts = []
+                                # First line: from startCol to end
+                                proof_parts.append(lines[start_line - 1][start_col:])
+                                # Middle lines: full content
+                                for i in range(start_line, end_line - 1):
+                                    proof_parts.append(lines[i])
+                                # Last line: from start to endCol
+                                proof_parts.append(lines[end_line - 1][:end_col])
+                                proof_text = ''.join(proof_parts)
+                            proof_text = proof_text.strip()
 
                             if proof_text:
                                 escaped_proof = html.escape(proof_text)
