@@ -78,17 +78,29 @@ def _render_node(node: Any) -> str:
     # Lean's ToJson for inductive types uses tagged format
     # The structure varies based on the constructor
 
-    # token: {"token": {"kind": {...}, "content": "..."}}
+    # token: {"token": {"tok": {"kind": {...}, "content": "..."}}} or {"token": {"kind": ..., "content": ...}}
     if "token" in node:
-        return _render_token(node["token"])
+        token_data = node["token"]
+        # Handle wrapped format: {"token": {"tok": {...}}}
+        if isinstance(token_data, dict) and "tok" in token_data:
+            token_data = token_data["tok"]
+        return _render_token(token_data)
 
-    # text: {"text": "..."}
+    # text: {"text": "..."} or {"text": {"str": "..."}}
     if "text" in node:
-        return html_escape(node["text"])
+        text_data = node["text"]
+        # Handle wrapped format: {"text": {"str": "..."}}
+        if isinstance(text_data, dict) and "str" in text_data:
+            text_data = text_data["str"]
+        return html_escape(text_data)
 
-    # seq: {"seq": [...]}
+    # seq: {"seq": [...]} or {"seq": {"highlights": [...]}}
     if "seq" in node:
-        return "".join(_render_node(child) for child in node["seq"])
+        seq_data = node["seq"]
+        # Handle wrapped format: {"seq": {"highlights": [...]}}
+        if isinstance(seq_data, dict) and "highlights" in seq_data:
+            seq_data = seq_data["highlights"]
+        return "".join(_render_node(child) for child in seq_data)
 
     # span: {"span": {"info": [...], "content": {...}}}
     if "span" in node:
