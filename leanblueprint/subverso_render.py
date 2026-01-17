@@ -23,11 +23,31 @@ LEXICAL_PATTERNS = [
     (r'(/-[\s\S]*?-/)', 'lean-comment'),
     # Numbers: integers, floats, hex
     (r'\b(\d+\.?\d*(?:e[+-]?\d+)?|0x[0-9a-fA-F]+)\b', 'lean-number'),
-    # Brackets
-    (r'([\(\)\[\]\{\}⟨⟩⟦⟧«»])', 'lean-bracket'),
     # Operators (mathematical/logical symbols)
     (r'([→←↔∀∃∈∉⊆⊇⊂⊃∧∨¬≤≥≠∼≃≡×∘∑∏∫∂√∞∅⁻¹·λ⊕⊗⊥⊤⊢⊣])', 'lean-operator'),
 ]
+
+# Bracket characters for rainbow highlighting
+OPENING_BRACKETS = '([{⟨⟦'
+CLOSING_BRACKETS = ')]}⟩⟧'
+
+
+def _highlight_brackets_with_depth(text: str) -> str:
+    """Highlight brackets with depth-based rainbow colors (6 colors cycling)."""
+    result = []
+    depth = 0
+    for char in text:
+        if char in OPENING_BRACKETS:
+            depth += 1
+            color_index = ((depth - 1) % 6) + 1
+            result.append(f'<span class="lean-bracket-{color_index}">{html_escape(char)}</span>')
+        elif char in CLOSING_BRACKETS:
+            color_index = ((depth - 1) % 6) + 1 if depth > 0 else 1
+            result.append(f'<span class="lean-bracket-{color_index}">{html_escape(char)}</span>')
+            depth = max(0, depth - 1)
+        else:
+            result.append(char)
+    return ''.join(result)
 
 
 def _highlight_plain_text(text: str) -> str:
@@ -35,7 +55,9 @@ def _highlight_plain_text(text: str) -> str:
     Apply regex-based highlighting to plain text for lexical tokens
     that SubVerso doesn't capture semantically (numbers, operators, brackets, comments).
     """
-    result = html_escape(text)
+    # First highlight brackets (handles depth tracking)
+    result = _highlight_brackets_with_depth(text)
+    # Then apply other lexical patterns
     for pattern, css_class in LEXICAL_PATTERNS:
         result = re.sub(pattern, rf'<span class="{css_class}">\1</span>', result)
     return result
