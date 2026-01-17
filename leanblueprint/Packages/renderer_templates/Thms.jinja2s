@@ -93,7 +93,12 @@ name: thmenv
     setTimeout(function() {
       var icon = container.querySelector('.expand-proof');
       var isExpanded = icon && icon.textContent.trim() === '▼';
-      leanProofBody.style.display = isExpanded ? 'inline' : 'none';
+      // Toggle expanded class for smooth CSS animation
+      if (isExpanded) {
+        leanProofBody.classList.add('expanded');
+      } else {
+        leanProofBody.classList.remove('expanded');
+      }
     }, 50);
   });
 })();
@@ -138,7 +143,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var observer = new MutationObserver(function() {
       // ▼ means expanded, ▶ means collapsed
       var isExpanded = expandIcon.textContent.trim() === '▼';
-      leanProofBody.style.display = isExpanded ? 'inline' : 'none';
+      // Toggle expanded class for smooth CSS animation
+      if (isExpanded) {
+        leanProofBody.classList.add('expanded');
+      } else {
+        leanProofBody.classList.remove('expanded');
+      }
     });
 
     observer.observe(expandIcon, { childList: true, characterData: true, subtree: true });

@@ -7,7 +7,7 @@ a.github_link {
 
 /* Override plasTeX default narrow content width for side-by-side layout */
 div.content-wrapper {
-  max-width: 1600px;  /* Much wider than default 75ch */
+  max-width: 1800px;  /* Much wider than default 75ch */
 }
 
 /* Side-by-side container for theorem/definition + Lean code */
@@ -16,6 +16,7 @@ div.content-wrapper {
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   align-items: start;
+  margin-bottom: 3rem;  /* Vertical spacing between declarations */
 }
 
 .sbs-latex-column,
@@ -65,8 +66,19 @@ div.content-wrapper {
 }
 
 /* Proof body initially hidden, shown via JS when proof toggle is expanded */
+/* Using max-height/opacity for smooth animation instead of display:none */
 .lean-proof-body {
-  display: none;
+  display: inline;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+}
+
+.lean-proof-body.expanded {
+  max-height: 5000px;  /* Large enough for any proof */
+  opacity: 1;
+  transition: max-height 0.4s ease-in, opacity 0.3s ease-in;
 }
 
 /* Hide old sequential panel */
