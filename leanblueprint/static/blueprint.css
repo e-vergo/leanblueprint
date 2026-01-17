@@ -107,8 +107,8 @@ div.content-wrapper {
 .lean-comment { color: #008000; font-style: italic; }  /* Green - comments */
 
 /* Rainbow brackets - VSCode light theme colors (One Light inspired) */
-.lean-bracket-1 { color: #B8860B; }  /* DarkGoldenrod - saturated gold */
-.lean-bracket-2 { color: #A626A4; }  /* Magenta/Purple */
+.lean-bracket-1 { color: #d000ff; }  /* DarkGoldenrod - saturated gold */
+.lean-bracket-2 { color: #5126ff; }  /* Magenta/Purple */
 .lean-bracket-3 { color: #0184BC; }  /* Cyan */
 .lean-bracket-4 { color: #4078F2; }  /* Blue */
 .lean-bracket-5 { color: #50A14F; }  /* Green */
