@@ -45,21 +45,21 @@ def clean_lean_source(source: str) -> tuple[str, str | None]:
         i = 0
         while i < len(text):
             if text[i:i+2] == '@[':
-                # Find matching closing bracket
-                depth = 0
-                j = i + 1
+                # Find matching closing bracket for the opening '[' after '@'
+                depth = 1  # Start at 1 because we've seen the opening '[' in '@['
+                j = i + 2  # Start after '@['
                 while j < len(text):
                     if text[j] == '[':
                         depth += 1
                     elif text[j] == ']':
+                        depth -= 1
                         if depth == 0:
-                            # Skip past the attribute
+                            # Found matching bracket, skip past the attribute
                             i = j + 1
                             # Skip any trailing whitespace/newlines
                             while i < len(text) and text[i] in ' \t\n':
                                 i += 1
                             break
-                        depth -= 1
                     j += 1
                 else:
                     # No matching bracket found, keep the character
@@ -203,6 +203,23 @@ class leanposition(Command):
         parts = self.attributes['position'].split('|')
         if len(parts) == 5:
             self.parentNode.setUserData('leanposition', {
+                'file': parts[0],
+                'startLine': int(parts[1]),
+                'startCol': int(parts[2]),
+                'endLine': int(parts[3]),
+                'endCol': int(parts[4])
+            })
+
+
+class leanproofposition(Command):
+    r"""\leanproofposition{file|startLine|startCol|endLine|endCol}"""
+    args = 'position:str'
+
+    def digest(self, tokens):
+        Command.digest(self, tokens)
+        parts = self.attributes['position'].split('|')
+        if len(parts) == 5:
+            self.parentNode.setUserData('leanproofposition', {
                 'file': parts[0],
                 'startLine': int(parts[1]),
                 'startCol': int(parts[2]),
@@ -356,8 +373,8 @@ def ProcessOptions(options, document):
                             f"#L{pos['startLine']}-L{pos['endLine']}"
                         )
 
-                    # If no SubVerso highlighted source, read file directly as fallback
-                    if not node.userdata.get('lean_source_html'):
+                    # Read signature source from leanposition (selectionRange - signature only)
+                    if not node.userdata.get('lean_signature_html'):
                         try:
                             import html
                             file_path = pos['file']
@@ -365,26 +382,42 @@ def ProcessOptions(options, document):
                             end_line = pos['endLine']
                             with open(file_path, 'r', encoding='utf-8') as f:
                                 lines = f.readlines()
-                            # Extract relevant lines (1-indexed in pos)
+                            # Extract signature lines (1-indexed in pos)
                             source_lines = lines[start_line - 1:end_line]
                             source_text = ''.join(source_lines)
 
-                            # Clean the source and split into signature/proof
-                            signature, proof_body = clean_lean_source(source_text)
+                            # Clean the source (strip docstrings and attributes)
+                            signature, _ = clean_lean_source(source_text)
 
-                            # Basic HTML escaping for both parts
+                            # Basic HTML escaping
                             escaped_signature = html.escape(signature)
                             node.userdata['lean_signature_html'] = f'<span class="lean-plain">{escaped_signature}</span>'
 
-                            if proof_body:
-                                escaped_proof = html.escape(proof_body)
-                                node.userdata['lean_proof_html'] = f'<span class="lean-plain">{escaped_proof}</span>'
-
-                            # Keep lean_source_html for backwards compatibility (full cleaned source)
-                            escaped_full = html.escape(source_text)
-                            node.userdata['lean_source_html'] = f'<span class="lean-plain">{escaped_full}</span>'
+                            # Keep lean_source_html for backwards compatibility
+                            node.userdata['lean_source_html'] = node.userdata['lean_signature_html']
                         except Exception as e:
-                            log.warning(f'Error reading Lean source file for {node}: {e}')
+                            log.warning(f'Error reading Lean signature for {node}: {e}')
+
+                # Process leanproofposition: read proof body source separately
+                if node.userdata.get('leanproofposition'):
+                    proof_pos = node.userdata['leanproofposition']
+                    if not node.userdata.get('lean_proof_html'):
+                        try:
+                            import html
+                            file_path = proof_pos['file']
+                            start_line = proof_pos['startLine']
+                            end_line = proof_pos['endLine']
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                lines = f.readlines()
+                            # Extract proof body lines (1-indexed)
+                            proof_lines = lines[start_line - 1:end_line]
+                            proof_text = ''.join(proof_lines).strip()
+
+                            if proof_text:
+                                escaped_proof = html.escape(proof_text)
+                                node.userdata['lean_proof_html'] = f'<span class="lean-plain">{escaped_proof}</span>'
+                        except Exception as e:
+                            log.warning(f'Error reading Lean proof body for {node}: {e}')
 
                 used = node.userdata.get('uses', [])
                 node.userdata['can_state'] = all(thm.userdata.get('leanok')
@@ -501,5 +534,5 @@ def ProcessOptions(options, document):
     document.userdata['dep_graph'].setdefault('extra_modal_links_tpl', []).extend([
         LEAN_LINKS_TPL, GITHUB_LINK_TPL])
 
-    # Register Lean source panel template for side-by-side display
-    document.userdata.setdefault('thm_body_extras_tpl', []).extend([LEAN_SOURCE_TPL])
+    # Note: Lean source panel is now rendered directly in Thms.jinja2s template
+    # via sbs-statement-grid, so we no longer register LEAN_SOURCE_TPL here
