@@ -5,6 +5,25 @@ a.github_link {
   color: inherit;
 }
 
+/* Side-by-Side Grid Layout */
+.sbs-statement-grid,
+.sbs-proof-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.sbs-latex-cell,
+.sbs-lean-cell {
+  min-width: 0;  /* Prevent overflow */
+}
+
+/* Hide old sequential panel */
+.thm_body_extras {
+  display: none;
+}
+
 /* Side-by-side container for LaTeX + Lean source */
 .side-by-side-container {
   display: flex;
@@ -28,7 +47,6 @@ a.github_link {
   background-color: #f8f9fa;
   border: 1px solid #e1e4e8;
   border-radius: 6px;
-  margin-top: 0.5rem;
   overflow: hidden;
 }
 
@@ -36,19 +54,19 @@ a.github_link {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem;
   background-color: #f1f3f5;
   border-bottom: 1px solid #e1e4e8;
 }
 
 .lean-source-title {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #495057;
 }
 
 .lean-github-link {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #0366d6;
   text-decoration: none;
 }
@@ -59,12 +77,14 @@ a.github_link {
 
 .lean-source-panel pre.lean-code {
   margin: 0;
-  padding: 1rem;
+  padding: 0.75rem;
   overflow-x: auto;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Consolas', monospace;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  background-color: #ffffff;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  background-color: #fff;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .lean-source-panel pre.lean-code code {
@@ -148,18 +168,5 @@ a.github_link {
 .lean-render-error {
   color: #c82829;
   font-style: italic;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .side-by-side-container {
-    flex-direction: column;
-  }
-
-  .side-by-side-container > .latex-panel,
-  .side-by-side-container > .lean-source-panel {
-    flex: 1 1 100%;
-    min-width: auto;
-  }
 }
 

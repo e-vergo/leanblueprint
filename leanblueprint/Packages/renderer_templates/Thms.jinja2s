@@ -39,8 +39,25 @@ name: thmenv
     </div>
     {% endif %}
   </div>
-  <div class="{{ obj.thmName }}_thmcontent">
-  {{ obj }}
+  <div class="sbs-statement-grid">
+    <div class="sbs-latex-cell">
+      <div class="{{ obj.thmName }}_thmcontent">
+      {{ obj }}
+      </div>
+    </div>
+    {% if obj.userdata.lean_signature_html %}
+    <div class="sbs-lean-cell">
+      <div class="lean-source-panel">
+        <div class="lean-source-header">
+          <span class="lean-source-title">Lean</span>
+          {% if obj.userdata.lean_github_permalink %}
+          <a href="{{ obj.userdata.lean_github_permalink }}" class="lean-github-link" target="_blank" title="View on GitHub">{{ icon('github') }}</a>
+          {% endif %}
+        </div>
+        <pre class="lean-code"><code>{{ obj.userdata.lean_signature_html | safe }}</code></pre>
+      </div>
+    </div>
+    {% endif %}
   </div>
   {% if doc.userdata.get('thm_body_extras_tpl') %}
   <div class="thm_body_extras">
@@ -66,8 +83,20 @@ name: proof
     </span>
     <span class="expand-proof">{{ doc.userdata.get('expand-proof_default_content', '▼') }}</span>
   </div>
-  <div class="proof_content">
-  {{ obj }}
+  <div class="proof_content sbs-proof-grid">
+    <div class="sbs-latex-cell">
+    {{ obj }}
+    </div>
+    {% if obj.userdata.lean_proof_from_parent %}
+    <div class="sbs-lean-cell">
+      <div class="lean-source-panel">
+        <div class="lean-source-header">
+          <span class="lean-source-title">Lean Proof</span>
+        </div>
+        <pre class="lean-code"><code>{{ obj.userdata.lean_proof_from_parent | safe }}</code></pre>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 

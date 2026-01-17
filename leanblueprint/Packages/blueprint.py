@@ -20,8 +20,73 @@ from plasTeX.Logging import getLogger
 from plasTeX.PackageResource import PackageCss, PackageTemplateDir
 from plastexdepgraph.Packages.depgraph import item_kind
 from leanblueprint.subverso_render import render_highlighted_base64
+import re
 
 log = getLogger()
+
+
+def clean_lean_source(source: str) -> tuple[str, str | None]:
+    """
+    Clean Lean source by stripping docstrings and attributes, then split into signature and proof.
+
+    Args:
+        source: Raw Lean source code
+
+    Returns:
+        (signature, proof_body) tuple where proof_body is None for definitions
+    """
+    # Strip /-- ... -/ docstrings (can span multiple lines)
+    cleaned = re.sub(r'/--.*?-/', '', source, flags=re.DOTALL)
+
+    # Strip @[...] attributes (can span multiple lines with nested brackets)
+    # Handle nested brackets by matching balanced brackets
+    def strip_attributes(text: str) -> str:
+        result = []
+        i = 0
+        while i < len(text):
+            if text[i:i+2] == '@[':
+                # Find matching closing bracket
+                depth = 0
+                j = i + 1
+                while j < len(text):
+                    if text[j] == '[':
+                        depth += 1
+                    elif text[j] == ']':
+                        if depth == 0:
+                            # Skip past the attribute
+                            i = j + 1
+                            # Skip any trailing whitespace/newlines
+                            while i < len(text) and text[i] in ' \t\n':
+                                i += 1
+                            break
+                        depth -= 1
+                    j += 1
+                else:
+                    # No matching bracket found, keep the character
+                    result.append(text[i])
+                    i += 1
+            else:
+                result.append(text[i])
+                i += 1
+        return ''.join(result)
+
+    cleaned = strip_attributes(cleaned)
+
+    # Strip leading/trailing whitespace
+    cleaned = cleaned.strip()
+
+    # Split signature from proof body by looking for := by pattern
+    # The pattern `:= by\n` indicates a tactic proof
+    match = re.search(r':=\s*by\s*\n', cleaned)
+    if match:
+        signature = cleaned[:match.end()].rstrip()
+        proof_body = cleaned[match.end():]
+        # Strip leading/trailing whitespace from proof body
+        proof_body = proof_body.strip() if proof_body.strip() else None
+        return (signature, proof_body)
+
+    # For definitions (no := by pattern), return full cleaned source as signature
+    return (cleaned, None)
 
 PKG_DIR = Path(__file__).parent
 STATIC_DIR = Path(__file__).parent.parent/'static'
@@ -303,9 +368,21 @@ def ProcessOptions(options, document):
                             # Extract relevant lines (1-indexed in pos)
                             source_lines = lines[start_line - 1:end_line]
                             source_text = ''.join(source_lines)
-                            # Basic HTML escaping
-                            escaped = html.escape(source_text)
-                            node.userdata['lean_source_html'] = f'<span class="lean-plain">{escaped}</span>'
+
+                            # Clean the source and split into signature/proof
+                            signature, proof_body = clean_lean_source(source_text)
+
+                            # Basic HTML escaping for both parts
+                            escaped_signature = html.escape(signature)
+                            node.userdata['lean_signature_html'] = f'<span class="lean-plain">{escaped_signature}</span>'
+
+                            if proof_body:
+                                escaped_proof = html.escape(proof_body)
+                                node.userdata['lean_proof_html'] = f'<span class="lean-plain">{escaped_proof}</span>'
+
+                            # Keep lean_source_html for backwards compatibility (full cleaned source)
+                            escaped_full = html.escape(source_text)
+                            node.userdata['lean_source_html'] = f'<span class="lean-plain">{escaped_full}</span>'
                         except Exception as e:
                             log.warning(f'Error reading Lean source file for {node}: {e}')
 
@@ -322,6 +399,13 @@ def ProcessOptions(options, document):
                 else:
                     node.userdata['can_prove'] = False
                     node.userdata['proved'] = False
+
+            # Link proof nodes to parent theorems: pass lean_proof_html to proof nodes
+            for node in nodes:
+                if node.userdata.get('lean_proof_html'):
+                    proof = node.userdata.get('proved_by')
+                    if proof:
+                        proof.userdata['lean_proof_from_parent'] = node.userdata['lean_proof_html']
 
             for node in nodes:
                 node.userdata['fully_proved'] = all(n.userdata.get('proved', False) or item_kind(
