@@ -266,13 +266,23 @@ def ProcessOptions(options, document):
                         log.warning(f'Error rendering Lean source for {node}: {e}')
                         node.userdata['lean_source_html'] = f'<span class="lean-render-error">Error rendering: {e}</span>'
 
-                # Process leanposition: build GitHub permalink
+                # Process leanposition: build GitHub permalink and fallback source display
                 if node.userdata.get('leanposition'):
                     pos = node.userdata['leanposition']
                     project_github = document.userdata.get('project_github')
                     if project_github:
-                        # Use the file path directly; it's relative to the project root
+                        # Convert absolute path to relative path for GitHub
                         file_path = pos['file']
+                        # Try to make path relative by finding common project patterns
+                        # The working directory is typically blueprint/src, so project root is two levels up
+                        working_dir = Path(document.userdata.get('working-dir', ''))
+                        project_root = working_dir.parent.parent  # Go from blueprint/src to project root
+                        try:
+                            rel_path = Path(file_path).relative_to(project_root)
+                            file_path = str(rel_path)
+                        except ValueError:
+                            # If path is already relative or doesn't match, use as-is
+                            pass
                         # Build permalink with line range
                         # Default to 'main' branch - this could be made configurable
                         branch = 'main'
@@ -280,6 +290,24 @@ def ProcessOptions(options, document):
                             f"{project_github}/blob/{branch}/{file_path}"
                             f"#L{pos['startLine']}-L{pos['endLine']}"
                         )
+
+                    # If no SubVerso highlighted source, read file directly as fallback
+                    if not node.userdata.get('lean_source_html'):
+                        try:
+                            import html
+                            file_path = pos['file']
+                            start_line = pos['startLine']
+                            end_line = pos['endLine']
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                lines = f.readlines()
+                            # Extract relevant lines (1-indexed in pos)
+                            source_lines = lines[start_line - 1:end_line]
+                            source_text = ''.join(source_lines)
+                            # Basic HTML escaping
+                            escaped = html.escape(source_text)
+                            node.userdata['lean_source_html'] = f'<span class="lean-plain">{escaped}</span>'
+                        except Exception as e:
+                            log.warning(f'Error reading Lean source file for {node}: {e}')
 
                 used = node.userdata.get('uses', [])
                 node.userdata['can_state'] = all(thm.userdata.get('leanok')
