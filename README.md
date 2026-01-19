@@ -1,3 +1,8 @@
+> **Fork Notice:** This is a fork of [PatrickMassot/leanblueprint](https://github.com/PatrickMassot/leanblueprint)
+> with experimental side-by-side Lean/LaTeX display features.
+>
+> **Warning:** This fork is not production-ready. Use at your own risk. APIs may have breaking changes.
+
 # Lean blueprints
 
 This is a [plasTeX](https://github.com/plastex/plastex/) plugin allowing
@@ -49,6 +54,23 @@ It is in approximate chronological order, at least in the beginning of the list.
 * [Spectral theorem](https://oliver-butterley.github.io/SpectralThm/)
 * [Sphere packing](https://thefundamentaltheor3m.github.io/Sphere-Packing-Lean/)
 * [Radii Polynomial](https://ilpreterosso.github.io/LEANearized-RadiiPolynomial/)
+
+## Side-by-Side Display (Experimental)
+
+This fork renders Lean code alongside LaTeX theorem statements, providing a unified view of formal and informal mathematics.
+
+**Features:**
+
+- **SubVerso JSON rendering** via `subverso_render.py` - converts SubVerso output to syntax-highlighted HTML
+- **Semantic highlighting** - CSS classes for Lean tokens: `lean-keyword`, `lean-const`, `lean-var`, `lean-string`, `lean-docstring`, `lean-sort`
+- **Lexical highlighting** - comments (`-- ...`), numbers, and mathematical operators
+- **Rainbow brackets** - 6-color depth cycling (`lean-bracket-1` through `lean-bracket-6`) for matching parentheses, brackets, and braces
+- **Proof toggle synchronization** - LaTeX proof expand/collapse toggles sync with Lean proof body visibility
+- **CSS grid layout** - 75ch fixed width for LaTeX column, flexible width for Lean column
+
+**Requirements:**
+
+This feature requires the companion fork [e-vergo/LeanArchitect](https://github.com/e-vergo/LeanArchitect) to generate the SubVerso JSON files.
 
 ## Installation
 
