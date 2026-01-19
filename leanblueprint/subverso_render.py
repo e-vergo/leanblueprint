@@ -408,19 +408,41 @@ def _token_data_attrs(kind: Any) -> str:
         return ""
 
     attrs = []
+    title_parts = []  # For building hover tooltip
 
-    # Extract signature for constants
+    # Extract signature and docs for constants
     if "const" in kind:
         const_data = kind["const"]
         if isinstance(const_data, dict):
+            name = const_data.get("name")
+            name_str = _name_to_string(name) if name else None
             sig = const_data.get("signature")
+            docs = const_data.get("docs")
+
+            if name_str:
+                attrs.append(f'data-name="{html_escape(name_str)}"')
             if sig:
                 attrs.append(f'data-signature="{html_escape(sig)}"')
-            name = const_data.get("name")
-            if name:
-                name_str = _name_to_string(name)
-                if name_str:
-                    attrs.append(f'data-name="{html_escape(name_str)}"')
+                title_parts.append(sig)
+            if docs:
+                attrs.append(f'data-docs="{html_escape(docs)}"')
+                # Add abbreviated docs to title (first line or first 100 chars)
+                doc_preview = docs.split('\n')[0][:100]
+                if len(docs) > len(doc_preview):
+                    doc_preview += "..."
+                title_parts.append(doc_preview)
+
+    # Extract signature and docs for anonymous constructors
+    if "anonCtor" in kind:
+        ctor_data = kind["anonCtor"]
+        if isinstance(ctor_data, dict):
+            sig = ctor_data.get("signature")
+            docs = ctor_data.get("docs")
+            if sig:
+                attrs.append(f'data-signature="{html_escape(sig)}"')
+                title_parts.append(sig)
+            if docs:
+                attrs.append(f'data-docs="{html_escape(docs)}"')
 
     # Extract type for variables
     if "var" in kind:
@@ -429,6 +451,7 @@ def _token_data_attrs(kind: Any) -> str:
             var_type = var_data.get("type")
             if var_type:
                 attrs.append(f'data-type="{html_escape(var_type)}"')
+                title_parts.append(var_type)
 
     # Extract docs for keywords
     if "keyword" in kind:
@@ -437,6 +460,30 @@ def _token_data_attrs(kind: Any) -> str:
             docs = kw_data.get("docs")
             if docs:
                 attrs.append(f'data-docs="{html_escape(docs)}"')
+                title_parts.append(docs.split('\n')[0][:100])
+
+    # Extract docs for sort (Type, Prop, Sort)
+    if "sort" in kind:
+        sort_data = kind["sort"]
+        if isinstance(sort_data, dict):
+            docs = sort_data.get("doc?")
+            if docs:
+                attrs.append(f'data-docs="{html_escape(docs)}"')
+                title_parts.append(docs.split('\n')[0][:100])
+
+    # Extract type for withType expressions
+    if "withType" in kind:
+        wt_data = kind["withType"]
+        if isinstance(wt_data, dict):
+            expr_type = wt_data.get("type")
+            if expr_type:
+                attrs.append(f'data-type="{html_escape(expr_type)}"')
+                title_parts.append(expr_type)
+
+    # Build title attribute for native hover tooltip
+    if title_parts:
+        title = "\n".join(title_parts)
+        attrs.append(f'title="{html_escape(title)}"')
 
     if attrs:
         return " " + " ".join(attrs)

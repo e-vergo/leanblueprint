@@ -90,8 +90,27 @@ div.content-wrapper {
 /* SubVerso Lean Syntax Highlighting - VSCode-inspired colors */
 .lean-keyword { color: #0000ff; }  /* Blue - keywords like def, theorem, if, then */
 .lean-const { color: #AF8700; }  /* Brown/gold - constants and functions */
-.lean-const.lean-def { font-weight: bold; }
+.lean-const.lean-def {
+  font-weight: bold;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
 .lean-var { color: #0070C1; }  /* Dark blue - local variables */
+
+/* Hover styling for tokens with type info */
+.lean-const[title],
+.lean-var[title],
+.lean-keyword[title],
+.lean-sort[title] {
+  cursor: help;
+}
+
+.lean-const[title]:hover,
+.lean-var[title]:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+}
 .lean-string { color: #a31515; }  /* Red - string literals */
 .lean-option { color: #795e26; }
 .lean-docstring { color: #008000; font-style: italic; }  /* Green - doc comments */
