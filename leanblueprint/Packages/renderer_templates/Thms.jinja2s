@@ -72,7 +72,7 @@ name: thmenv
   </div>
   {% if obj.userdata.lean_signature_html %}
   <div class="sbs-lean-column">
-    <pre class="lean-code"{% if obj.userdata.lean_hover_data %} data-lean-hovers='{{ obj.userdata.lean_hover_data }}'{% endif %}><code class="lean-signature">{{ obj.userdata.lean_signature_html | safe }}</code>{% if obj.userdata.lean_proof_html %}<code class="lean-proof-body">{{ obj.userdata.lean_proof_html | safe }}</code>{% endif %}</pre>
+    <pre class="lean-code"{% if obj.userdata.lean_hover_data %} data-lean-hovers='{{ obj.userdata.lean_hover_data | replace("'", "&#39;") }}'{% endif %}><code class="lean-signature">{{ obj.userdata.lean_signature_html | safe }}</code>{% if obj.userdata.lean_proof_html %}<code class="lean-proof-body">{{ obj.userdata.lean_proof_html | safe }}</code>{% endif %}</pre>
     {% if obj.userdata.lean_github_permalink %}
     <a href="{{ obj.userdata.lean_github_permalink }}" class="lean-github-hover" target="_blank" title="View on GitHub">{{ icon('github') }}</a>
     {% endif %}
@@ -92,12 +92,12 @@ name: thmenv
     // Read icon state after plastex.js has toggled it
     setTimeout(function() {
       var icon = container.querySelector('.expand-proof');
-      var isExpanded = icon && icon.textContent.trim() === '▼';
-      // Toggle expanded class for smooth CSS animation
-      if (isExpanded) {
-        leanProofBody.classList.add('expanded');
+      var isCollapsed = icon && icon.textContent.trim() === '▶';
+      // Toggle collapsed class for smooth CSS animation
+      if (isCollapsed) {
+        leanProofBody.classList.add('collapsed');
       } else {
-        leanProofBody.classList.remove('expanded');
+        leanProofBody.classList.remove('collapsed');
       }
     }, 50);
   });
