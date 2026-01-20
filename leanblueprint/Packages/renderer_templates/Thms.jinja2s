@@ -72,7 +72,7 @@ name: thmenv
   </div>
   {% if obj.userdata.lean_signature_html %}
   <div class="sbs-lean-column">
-    <pre class="lean-code"><code class="lean-signature">{{ obj.userdata.lean_signature_html | safe }}</code>{% if obj.userdata.lean_proof_html %}<code class="lean-proof-body">{{ obj.userdata.lean_proof_html | safe }}</code>{% endif %}</pre>
+    <pre class="lean-code"{% if obj.userdata.lean_hover_data %} data-lean-hovers='{{ obj.userdata.lean_hover_data }}'{% endif %}><code class="lean-signature">{{ obj.userdata.lean_signature_html | safe }}</code>{% if obj.userdata.lean_proof_html %}<code class="lean-proof-body">{{ obj.userdata.lean_proof_html | safe }}</code>{% endif %}</pre>
     {% if obj.userdata.lean_github_permalink %}
     <a href="{{ obj.userdata.lean_github_permalink }}" class="lean-github-hover" target="_blank" title="View on GitHub">{{ icon('github') }}</a>
     {% endif %}
@@ -152,6 +152,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     observer.observe(expandIcon, { childList: true, characterData: true, subtree: true });
+  });
+
+  // Lean hover tooltips
+  var tooltip = document.createElement('div');
+  tooltip.className = 'lean-hover-tooltip';
+  tooltip.style.display = 'none';
+  document.body.appendChild(tooltip);
+
+  document.querySelectorAll('.lean-code').forEach(function(codeBlock) {
+    var hoverData = codeBlock.dataset.leanHovers;
+    if (!hoverData) return;
+
+    var hovers;
+    try {
+      hovers = JSON.parse(hoverData);
+    } catch (e) {
+      console.warn('Failed to parse hover data:', e);
+      return;
+    }
+
+    codeBlock.querySelectorAll('[data-verso-hover]').forEach(function(el) {
+      var hoverId = el.dataset.versoHover;
+      var content = hovers[hoverId];
+      if (!content) return;
+
+      el.addEventListener('mouseenter', function(e) {
+        tooltip.innerHTML = content;
+        tooltip.style.display = 'block';
+        var rect = el.getBoundingClientRect();
+        tooltip.style.left = rect.left + window.scrollX + 'px';
+        tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+      });
+
+      el.addEventListener('mouseleave', function() {
+        tooltip.style.display = 'none';
+      });
+    });
   });
 });
 </script>

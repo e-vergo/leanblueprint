@@ -270,6 +270,25 @@ class leanproofsourcehtml(Command):
             log.warning(f'Error decoding leanproofsourcehtml: {e}')
 
 
+class leanhoverdata(Command):
+    r"""\leanhoverdata{base64_encoded_json}
+
+    Hover data JSON mapping hover IDs to their HTML content.
+    Used by JavaScript to display type info on hover.
+    """
+    args = 'data:str'
+
+    def digest(self, tokens):
+        import base64
+        Command.digest(self, tokens)
+        try:
+            json_bytes = base64.b64decode(self.attributes['data'])
+            json_str = json_bytes.decode('utf-8')
+            self.parentNode.setUserData('lean_hover_data', json_str)
+        except Exception as e:
+            log.warning(f'Error decoding leanhoverdata: {e}')
+
+
 class leanposition(Command):
     r"""\leanposition{file|startLine|startCol|endLine|endCol}"""
     args = 'position:str'
