@@ -104,63 +104,21 @@ name: thmenv
 })();
 </script>
 {% endif %}
-
-name: proof
-{% macro icon(icon, id='', class='') %}
-<svg  {% if id %}id="{{id}}" {% endif %}class="icon icon-{{ icon }} {{ class }}"><use xlink:href="symbol-defs.svg#icon-{{ icon }}"></use></svg>
-{% endmacro %}
-{% if not obj.userdata.get('rendered_inline') %}
-<div class="proof_wrapper" id="{{ obj.id }}">
-  <div class="proof_heading">
-    <span class="proof_caption">
-    {% if obj.caption %}
-    {{ obj.caption }}
-    {% else %}
-    {{ context.terms['proof'] }}
-    {% endif %}
-    </span>
-    <span class="expand-proof">{{ doc.userdata.get('expand-proof_default_content', '▼') }}</span>
-  </div>
-  <div class="proof_content">
-  {{ obj }}
-  </div>
-</div>
-{% endif %}
-
-name: qedhere qed
-<span class="qed">□</span>
-
-name: sbs-script
+{% if obj.userdata.lean_hover_data %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.sbs-container').forEach(function(container) {
-    var expandIcon = container.querySelector('.expand-proof');
-    var leanProofBody = container.querySelector('.lean-proof-body');
+(function() {
+  // Global initialization guard - only run once per page
+  if (window._leanHoverTooltipsInitialized) return;
+  window._leanHoverTooltipsInitialized = true;
 
-    if (!expandIcon || !leanProofBody) return;
-
-    // Watch for plastex.js changing the expand icon text (▶ ↔ ▼)
-    var observer = new MutationObserver(function() {
-      // ▼ means expanded, ▶ means collapsed
-      var isExpanded = expandIcon.textContent.trim() === '▼';
-      // Toggle expanded class for smooth CSS animation
-      if (isExpanded) {
-        leanProofBody.classList.add('expanded');
-      } else {
-        leanProofBody.classList.remove('expanded');
-      }
-    });
-
-    observer.observe(expandIcon, { childList: true, characterData: true, subtree: true });
-  });
-
-  // Lean hover tooltips
+  // Create tooltip element
   var tooltip = document.createElement('div');
   tooltip.className = 'lean-hover-tooltip';
   tooltip.style.display = 'none';
   document.body.appendChild(tooltip);
 
-  document.querySelectorAll('.lean-code').forEach(function(codeBlock) {
+  // Initialize hover tooltips for all .lean-code blocks
+  document.querySelectorAll('.lean-code[data-lean-hovers]').forEach(function(codeBlock) {
     var hoverData = codeBlock.dataset.leanHovers;
     if (!hoverData) return;
 
@@ -190,5 +148,31 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   });
-});
+})();
 </script>
+{% endif %}
+
+name: proof
+{% macro icon(icon, id='', class='') %}
+<svg  {% if id %}id="{{id}}" {% endif %}class="icon icon-{{ icon }} {{ class }}"><use xlink:href="symbol-defs.svg#icon-{{ icon }}"></use></svg>
+{% endmacro %}
+{% if not obj.userdata.get('rendered_inline') %}
+<div class="proof_wrapper" id="{{ obj.id }}">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    {% if obj.caption %}
+    {{ obj.caption }}
+    {% else %}
+    {{ context.terms['proof'] }}
+    {% endif %}
+    </span>
+    <span class="expand-proof">{{ doc.userdata.get('expand-proof_default_content', '▼') }}</span>
+  </div>
+  <div class="proof_content">
+  {{ obj }}
+  </div>
+</div>
+{% endif %}
+
+name: qedhere qed
+<span class="qed">□</span>
