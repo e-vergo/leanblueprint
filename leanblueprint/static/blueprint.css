@@ -88,15 +88,22 @@ div.content-wrapper {
 }
 
 /* SubVerso Lean Syntax Highlighting - VSCode-inspired colors */
-.lean-keyword { color: #0000ff; }  /* Blue - keywords like def, theorem, if, then */
-.lean-const { color: #AF8700; }  /* Brown/gold - constants and functions */
-.lean-const.lean-def {
+/* Both leanblueprint classes (lean-*) and Verso classes (bare names) are supported */
+
+/* Keywords: def, theorem, if, then, etc. */
+.lean-keyword, .hl.lean .keyword { color: #0000ff; }
+
+/* Constants and functions */
+.lean-const, .hl.lean .const { color: #AF8700; }
+.lean-const.lean-def, .hl.lean .const[data-defining="true"] {
   font-weight: bold;
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 2px;
 }
-.lean-var { color: #0070C1; }  /* Dark blue - local variables */
+
+/* Local variables */
+.lean-var, .hl.lean .var { color: #0070C1; }
 
 /* Hover styling for tokens with type info */
 .lean-const[title],
@@ -111,14 +118,31 @@ div.content-wrapper {
   background-color: rgba(0, 0, 0, 0.05);
   border-radius: 2px;
 }
-.lean-string { color: #a31515; }  /* Red - string literals */
-.lean-option { color: #795e26; }
-.lean-docstring { color: #008000; font-style: italic; }  /* Green - doc comments */
-.lean-sort { color: #267f99; }  /* Teal - Type, Prop, Sort */
-.lean-level { color: #098658; }  /* Green - universe levels */
-.lean-module { color: #795e26; }
-.lean-expr { color: inherit; }
-.lean-text { color: inherit; }
+/* String literals - "literal string" in Verso */
+.lean-string, .hl.lean .literal.string { color: #a31515; }
+
+/* Options */
+.lean-option, .hl.lean .option { color: #795e26; }
+
+/* Doc comments */
+.lean-docstring, .hl.lean .doc-comment { color: #008000; font-style: italic; }
+
+/* Sorts: Type, Prop, Sort */
+.lean-sort, .hl.lean .sort { color: #267f99; }
+
+/* Universe levels */
+.lean-level, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op { color: #098658; }
+
+/* Module names */
+.lean-module, .hl.lean .module-name { color: #795e26; }
+
+/* Typed expressions */
+.lean-expr, .hl.lean .typed { color: inherit; }
+
+/* Plain text and unknown tokens */
+.lean-text, .hl.lean .unknown, .hl.lean .inter-text { color: inherit; }
+
+/* Sorry */
 .lean-sorry { color: #ff0000; background-color: #ffeaea; font-weight: bold; }
 
 /* Lexical token highlighting (regex-based) */
@@ -134,11 +158,11 @@ div.content-wrapper {
 .lean-bracket-5 { color: #50A14F; }  /* Green */
 .lean-bracket-6 { color: #E45649; }  /* Red */
 
-/* Message spans */
-.lean-span { }
-.lean-error { text-decoration: wavy underline #c82829; }
-.lean-warning { text-decoration: wavy underline #eab700; }
-.lean-info { text-decoration: underline dotted #4271ae; }
+/* Message spans - both leanblueprint and Verso class names */
+.lean-span, .hl.lean .has-info { }
+.lean-error, .hl.lean .has-info.error { text-decoration: wavy underline #c82829; }
+.lean-warning, .hl.lean .has-info.warning { text-decoration: wavy underline #eab700; }
+.lean-info, .hl.lean .has-info.information { text-decoration: underline dotted #4271ae; }
 
 /* Point markers */
 .lean-point { display: inline-block; width: 0; height: 0; }

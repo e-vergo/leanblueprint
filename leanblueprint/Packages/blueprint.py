@@ -212,6 +212,64 @@ class leanproofsource(Command):
         self.parentNode.setUserData('leanproof_base64', self.attributes['source'])
 
 
+class leansourcehtml(Command):
+    r"""\leansourcehtml{base64_encoded_html}
+
+    Pre-rendered HTML for the full Lean source code.
+    This skips the SubVerso JSON → HTML rendering step for faster processing.
+    """
+    args = 'source:str'
+
+    def digest(self, tokens):
+        import base64
+        Command.digest(self, tokens)
+        # Decode base64 HTML directly - no SubVerso rendering needed!
+        try:
+            html_bytes = base64.b64decode(self.attributes['source'])
+            html_str = html_bytes.decode('utf-8')
+            self.parentNode.setUserData('lean_source_html', html_str)
+        except Exception as e:
+            log.warning(f'Error decoding leansourcehtml: {e}')
+
+
+class leansignaturesourcehtml(Command):
+    r"""\leansignaturesourcehtml{base64_encoded_html}
+
+    Pre-rendered HTML for just the Lean signature (up to and including :=).
+    This skips the SubVerso JSON → HTML rendering step for faster processing.
+    """
+    args = 'source:str'
+
+    def digest(self, tokens):
+        import base64
+        Command.digest(self, tokens)
+        try:
+            html_bytes = base64.b64decode(self.attributes['source'])
+            html_str = html_bytes.decode('utf-8')
+            self.parentNode.setUserData('lean_signature_html', html_str)
+        except Exception as e:
+            log.warning(f'Error decoding leansignaturesourcehtml: {e}')
+
+
+class leanproofsourcehtml(Command):
+    r"""\leanproofsourcehtml{base64_encoded_html}
+
+    Pre-rendered HTML for just the Lean proof body (after :=).
+    This skips the SubVerso JSON → HTML rendering step for faster processing.
+    """
+    args = 'source:str'
+
+    def digest(self, tokens):
+        import base64
+        Command.digest(self, tokens)
+        try:
+            html_bytes = base64.b64decode(self.attributes['source'])
+            html_str = html_bytes.decode('utf-8')
+            self.parentNode.setUserData('lean_proof_html', html_str)
+        except Exception as e:
+            log.warning(f'Error decoding leanproofsourcehtml: {e}')
+
+
 class leanposition(Command):
     r"""\leanposition{file|startLine|startCol|endLine|endCol}"""
     args = 'position:str'
@@ -356,8 +414,10 @@ def ProcessOptions(options, document):
 
                 node.userdata['lean_urls'] = lean_urls
 
-                # Process leansource_base64: render SubVerso JSON to HTML
-                if node.userdata.get('leansource_base64'):
+                # Process Lean source highlighting
+                # Priority 1: Pre-rendered HTML from \leansourcehtml (fastest - no rendering needed)
+                # Priority 2: Render from SubVerso JSON via \leansource (fallback)
+                if not node.userdata.get('lean_source_html') and node.userdata.get('leansource_base64'):
                     try:
                         node.userdata['lean_source_html'] = render_highlighted_base64(
                             node.userdata['leansource_base64']
@@ -366,9 +426,10 @@ def ProcessOptions(options, document):
                         log.warning(f'Error rendering Lean source for {node}: {e}')
                         node.userdata['lean_source_html'] = f'<span class="lean-render-error">Error rendering: {e}</span>'
 
-                # Process leansignature_base64: render SubVerso-highlighted signature to HTML
-                # This is the preferred path when available (from new LeanArchitect)
-                if node.userdata.get('leansignature_base64'):
+                # Process Lean signature highlighting
+                # Priority 1: Pre-rendered HTML from \leansignaturesourcehtml (fastest)
+                # Priority 2: Render from SubVerso JSON via \leansignaturesource (fallback)
+                if not node.userdata.get('lean_signature_html') and node.userdata.get('leansignature_base64'):
                     try:
                         node.userdata['lean_signature_html'] = render_highlighted_base64(
                             node.userdata['leansignature_base64']
@@ -376,9 +437,10 @@ def ProcessOptions(options, document):
                     except Exception as e:
                         log.warning(f'Error rendering Lean signature for {node}: {e}')
 
-                # Process leanproof_base64: render SubVerso-highlighted proof body to HTML
-                # This is the preferred path when available (from new LeanArchitect)
-                if node.userdata.get('leanproof_base64'):
+                # Process Lean proof body highlighting
+                # Priority 1: Pre-rendered HTML from \leanproofsourcehtml (fastest)
+                # Priority 2: Render from SubVerso JSON via \leanproofsource (fallback)
+                if not node.userdata.get('lean_proof_html') and node.userdata.get('leanproof_base64'):
                     try:
                         node.userdata['lean_proof_html'] = render_highlighted_base64(
                             node.userdata['leanproof_base64']
