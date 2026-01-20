@@ -111,43 +111,52 @@ name: thmenv
   if (window._leanHoverTooltipsInitialized) return;
   window._leanHoverTooltipsInitialized = true;
 
-  // Create tooltip element
-  var tooltip = document.createElement('div');
-  tooltip.className = 'lean-hover-tooltip';
-  tooltip.style.display = 'none';
-  document.body.appendChild(tooltip);
+  function initHoverTooltips() {
+    // Create tooltip element
+    var tooltip = document.createElement('div');
+    tooltip.className = 'lean-hover-tooltip';
+    tooltip.style.display = 'none';
+    document.body.appendChild(tooltip);
 
-  // Initialize hover tooltips for all .lean-code blocks
-  document.querySelectorAll('.lean-code[data-lean-hovers]').forEach(function(codeBlock) {
-    var hoverData = codeBlock.dataset.leanHovers;
-    if (!hoverData) return;
+    // Initialize hover tooltips for all .lean-code blocks
+    document.querySelectorAll('.lean-code[data-lean-hovers]').forEach(function(codeBlock) {
+      var hoverData = codeBlock.dataset.leanHovers;
+      if (!hoverData) return;
 
-    var hovers;
-    try {
-      hovers = JSON.parse(hoverData);
-    } catch (e) {
-      console.warn('Failed to parse hover data:', e);
-      return;
-    }
+      var hovers;
+      try {
+        hovers = JSON.parse(hoverData);
+      } catch (e) {
+        console.warn('Failed to parse hover data:', e);
+        return;
+      }
 
-    codeBlock.querySelectorAll('[data-verso-hover]').forEach(function(el) {
-      var hoverId = el.dataset.versoHover;
-      var content = hovers[hoverId];
-      if (!content) return;
+      codeBlock.querySelectorAll('[data-verso-hover]').forEach(function(el) {
+        var hoverId = el.dataset.versoHover;
+        var content = hovers[hoverId];
+        if (!content) return;
 
-      el.addEventListener('mouseenter', function(e) {
-        tooltip.innerHTML = content;
-        tooltip.style.display = 'block';
-        var rect = el.getBoundingClientRect();
-        tooltip.style.left = rect.left + window.scrollX + 'px';
-        tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-      });
+        el.addEventListener('mouseenter', function(e) {
+          tooltip.innerHTML = content;
+          tooltip.style.display = 'block';
+          var rect = el.getBoundingClientRect();
+          tooltip.style.left = rect.left + window.scrollX + 'px';
+          tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+        });
 
-      el.addEventListener('mouseleave', function() {
-        tooltip.style.display = 'none';
+        el.addEventListener('mouseleave', function() {
+          tooltip.style.display = 'none';
+        });
       });
     });
-  });
+  }
+
+  // Wait for DOM to be fully loaded before initializing
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHoverTooltips);
+  } else {
+    initHoverTooltips();
+  }
 })();
 </script>
 {% endif %}
