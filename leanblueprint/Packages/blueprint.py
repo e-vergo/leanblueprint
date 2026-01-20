@@ -19,7 +19,7 @@ from plasTeX import Command
 from plasTeX.Logging import getLogger
 from plasTeX.PackageResource import PackageCss, PackageJs, PackageTemplateDir
 from plastexdepgraph.Packages.depgraph import item_kind
-from leanblueprint.subverso_render import render_highlighted_base64
+# Note: render_highlighted_base64 removed - Dress artifacts are now required
 import re
 
 log = getLogger()
@@ -229,7 +229,7 @@ class leansourcehtml(Command):
             html_str = html_bytes.decode('utf-8')
             self.parentNode.setUserData('lean_source_html', html_str)
         except Exception as e:
-            log.warning(f'Error decoding leansourcehtml: {e}')
+            raise RuntimeError(f'Failed to decode Dress artifact \\leansourcehtml: {e}') from e
 
 
 class leansignaturesourcehtml(Command):
@@ -248,7 +248,7 @@ class leansignaturesourcehtml(Command):
             html_str = html_bytes.decode('utf-8')
             self.parentNode.setUserData('lean_signature_html', html_str)
         except Exception as e:
-            log.warning(f'Error decoding leansignaturesourcehtml: {e}')
+            raise RuntimeError(f'Failed to decode Dress artifact \\leansignaturesourcehtml: {e}') from e
 
 
 class leanproofsourcehtml(Command):
@@ -267,7 +267,7 @@ class leanproofsourcehtml(Command):
             html_str = html_bytes.decode('utf-8')
             self.parentNode.setUserData('lean_proof_html', html_str)
         except Exception as e:
-            log.warning(f'Error decoding leanproofsourcehtml: {e}')
+            raise RuntimeError(f'Failed to decode Dress artifact \\leanproofsourcehtml: {e}') from e
 
 
 class leanhoverdata(Command):
@@ -286,7 +286,7 @@ class leanhoverdata(Command):
             json_str = json_bytes.decode('utf-8')
             self.parentNode.setUserData('lean_hover_data', json_str)
         except Exception as e:
-            log.warning(f'Error decoding leanhoverdata: {e}')
+            raise RuntimeError(f'Failed to decode Dress artifact \\leanhoverdata: {e}') from e
 
 
 class leanposition(Command):
@@ -433,39 +433,25 @@ def ProcessOptions(options, document):
 
                 node.userdata['lean_urls'] = lean_urls
 
-                # Process Lean source highlighting
-                # Priority 1: Pre-rendered HTML from \leansourcehtml (fastest - no rendering needed)
-                # Priority 2: Render from SubVerso JSON via \leansource (fallback)
-                if not node.userdata.get('lean_source_html') and node.userdata.get('leansource_base64'):
-                    try:
-                        node.userdata['lean_source_html'] = render_highlighted_base64(
-                            node.userdata['leansource_base64']
-                        )
-                    except Exception as e:
-                        log.warning(f'Error rendering Lean source for {node}: {e}')
-                        node.userdata['lean_source_html'] = f'<span class="lean-render-error">Error rendering: {e}</span>'
+                # Require Dress artifacts - no fallback rendering
+                # If SubVerso JSON is present but pre-rendered HTML is missing, error
+                if node.userdata.get('leansource_base64') and not node.userdata.get('lean_source_html'):
+                    raise RuntimeError(
+                        f"Missing Dress artifacts for {node}: found \\leansource but not \\leansourcehtml. "
+                        "Run Dress to generate pre-rendered HTML artifacts."
+                    )
 
-                # Process Lean signature highlighting
-                # Priority 1: Pre-rendered HTML from \leansignaturesourcehtml (fastest)
-                # Priority 2: Render from SubVerso JSON via \leansignaturesource (fallback)
-                if not node.userdata.get('lean_signature_html') and node.userdata.get('leansignature_base64'):
-                    try:
-                        node.userdata['lean_signature_html'] = render_highlighted_base64(
-                            node.userdata['leansignature_base64']
-                        )
-                    except Exception as e:
-                        log.warning(f'Error rendering Lean signature for {node}: {e}')
+                if node.userdata.get('leansignature_base64') and not node.userdata.get('lean_signature_html'):
+                    raise RuntimeError(
+                        f"Missing Dress artifacts for {node}: found \\leansignaturesource but not \\leansignaturesourcehtml. "
+                        "Run Dress to generate pre-rendered HTML artifacts."
+                    )
 
-                # Process Lean proof body highlighting
-                # Priority 1: Pre-rendered HTML from \leanproofsourcehtml (fastest)
-                # Priority 2: Render from SubVerso JSON via \leanproofsource (fallback)
-                if not node.userdata.get('lean_proof_html') and node.userdata.get('leanproof_base64'):
-                    try:
-                        node.userdata['lean_proof_html'] = render_highlighted_base64(
-                            node.userdata['leanproof_base64']
-                        )
-                    except Exception as e:
-                        log.warning(f'Error rendering Lean proof body for {node}: {e}')
+                if node.userdata.get('leanproof_base64') and not node.userdata.get('lean_proof_html'):
+                    raise RuntimeError(
+                        f"Missing Dress artifacts for {node}: found \\leanproofsource but not \\leanproofsourcehtml. "
+                        "Run Dress to generate pre-rendered HTML artifacts."
+                    )
 
                 # Process leanposition: build GitHub permalink and fallback source display
                 if node.userdata.get('leanposition'):
@@ -492,74 +478,20 @@ def ProcessOptions(options, document):
                             f"#L{pos['startLine']}-L{pos['endLine']}"
                         )
 
-                    # Read signature source from leanposition (full declaration range)
+                    # Require Dress artifacts when position data is present
+                    # File reading fallback is no longer supported - use Dress
                     if not node.userdata.get('lean_signature_html'):
-                        try:
-                            import html
-                            file_path = pos['file']
-                            start_line = pos['startLine']
-                            end_line = pos['endLine']
-                            with open(file_path, 'r', encoding='utf-8') as f:
-                                lines = f.readlines()
-                            # Extract full declaration lines (1-indexed in pos)
-                            source_lines = lines[start_line - 1:end_line]
-                            source_text = ''.join(source_lines)
+                        raise RuntimeError(
+                            f"Missing Dress artifacts for {node}: found \\leanposition but not \\leansignaturesourcehtml. "
+                            "Run Dress to generate pre-rendered HTML artifacts."
+                        )
 
-                            # Clean the source and split into signature and proof body
-                            signature, proof_body = clean_lean_source(source_text)
-
-                            # Basic HTML escaping for signature
-                            escaped_signature = html.escape(signature)
-                            node.userdata['lean_signature_html'] = f'<span class="lean-plain">{escaped_signature}</span>'
-
-                            # Store proof body if present (this is more reliable than leanproofposition)
-                            if proof_body:
-                                escaped_proof = html.escape(proof_body)
-                                node.userdata['lean_proof_html'] = f'<span class="lean-plain">{escaped_proof}</span>'
-
-                            # Keep lean_source_html for backwards compatibility
-                            node.userdata['lean_source_html'] = node.userdata['lean_signature_html']
-                        except Exception as e:
-                            log.warning(f'Error reading Lean signature for {node}: {e}')
-
-                # Process leanproofposition: fallback for proof body extraction
-                # NOTE: This is typically not used since clean_lean_source() above already
-                # extracts the proof body more reliably. The leanproofposition coordinates
-                # from Lean point to the declaration name end, not the actual proof start.
-                if node.userdata.get('leanproofposition'):
-                    proof_pos = node.userdata['leanproofposition']
-                    if not node.userdata.get('lean_proof_html'):
-                        try:
-                            import html
-                            file_path = proof_pos['file']
-                            start_line = proof_pos['startLine']
-                            start_col = proof_pos['startCol']
-                            end_line = proof_pos['endLine']
-                            end_col = proof_pos['endCol']
-                            with open(file_path, 'r', encoding='utf-8') as f:
-                                lines = f.readlines()
-                            # Extract proof body using column positions (1-indexed lines, 0-indexed cols)
-                            if start_line == end_line:
-                                # Single line: extract from startCol to endCol
-                                proof_text = lines[start_line - 1][start_col:end_col]
-                            else:
-                                # Multi-line: first line from startCol, middle lines full, last line to endCol
-                                proof_parts = []
-                                # First line: from startCol to end
-                                proof_parts.append(lines[start_line - 1][start_col:])
-                                # Middle lines: full content
-                                for i in range(start_line, end_line - 1):
-                                    proof_parts.append(lines[i])
-                                # Last line: from start to endCol
-                                proof_parts.append(lines[end_line - 1][:end_col])
-                                proof_text = ''.join(proof_parts)
-                            proof_text = proof_text.strip()
-
-                            if proof_text:
-                                escaped_proof = html.escape(proof_text)
-                                node.userdata['lean_proof_html'] = f'<span class="lean-plain">{escaped_proof}</span>'
-                        except Exception as e:
-                            log.warning(f'Error reading Lean proof body for {node}: {e}')
+                # Require Dress artifacts when proof position data is present
+                if node.userdata.get('leanproofposition') and not node.userdata.get('lean_proof_html'):
+                    raise RuntimeError(
+                        f"Missing Dress artifacts for {node}: found \\leanproofposition but not \\leanproofsourcehtml. "
+                        "Run Dress to generate pre-rendered HTML artifacts."
+                    )
 
                 used = node.userdata.get('uses', [])
                 node.userdata['can_state'] = all(thm.userdata.get('leanok')

@@ -1,276 +1,273 @@
-> **Fork Notice:** This is a fork of [PatrickMassot/leanblueprint](https://github.com/PatrickMassot/leanblueprint)
-> with experimental side-by-side Lean/LaTeX display features.
->
-> **Warning:** This fork is not production-ready. Use at your own risk. APIs may have breaking changes.
+# leanblueprint
 
-# Lean blueprints
+**leanblueprint** is a [plasTeX](https://github.com/plastex/plastex/) plugin for creating interactive mathematical blueprints for Lean 4 projects. It consumes artifacts from [Dress](https://github.com/e-vergo/Dress) to produce websites with syntax-highlighted Lean code, hover tooltips, expandable proofs, and dependency graphs.
 
-This is a [plasTeX](https://github.com/plastex/plastex/) plugin allowing
-to write blueprints for Lean 4 projects.
-You can learn what those blueprints are about by reading
-Terence Tao’s excellent [blog post about it](https://terrytao.wordpress.com/2023/11/18/formalizing-the-proof-of-pfr-in-lean4-using-blueprint-a-short-tour/).
+## Architecture
 
-This infrastructure was originally created in 2020 for the
-[Sphere Eversion Project](https://leanprover-community.github.io/sphere-eversion/).
-Since then, it has been used by many projects. The list below will give you many
-examples but is not intended to be exhaustive.
-It is in approximate chronological order, at least in the beginning of the list.
+leanblueprint is the **presentation layer** in the blueprint toolchain:
 
-* [Sphere eversion project](https://leanprover-community.github.io/sphere-eversion/blueprint/index.html)
-* [Liquid tensor experiment](https://leanprover-community.github.io/liquid/)
-* [Unit fractions](https://b-mehta.github.io/unit-fractions/)
-* [Fermat’s last theorem for regular primes](https://leanprover-community.github.io/flt-regular/blueprint/)
-* [Arithmetic Progressions - Almost Periodicity](https://yaeldillies.github.io/LeanAPAP/blueprint/)
-* [Polynomial Freiman-Ruzsa Conjecture](https://teorth.github.io/pfr/blueprint/)
-* [Lower bounds for hypothesis testing based on information theory](https://remydegenne.github.io/testing-lower-bounds/blueprint/)
-* [New Foundations is consistent](https://leanprover-community.github.io/con-nf/)
-* [Prime number theorem and…](https://alexkontorovich.github.io/PrimeNumberTheoremAnd/web/)
-* [Fermat's Last Theorem for 3](https://pitmonticone.github.io/FLT3/blueprint)
-* [Fermat’s last theorem](https://imperialcollegelondon.github.io/FLT/blueprint/)
-* [Carleson Operators on Doubling Metric Measure Spaces](http://florisvandoorn.com/carleson/)
-* [Infinity Cosmos](https://github.com/emilyriehl/infinity-cosmos)
-* [Analytic Number Theory Exponent Database](https://github.com/teorth/expdb)
-* [Equational Theories](https://github.com/teorth/equational_theories)
-* [HoTTLean](https://sinhp.github.io/groupoid_model_in_lean4/)
-* [Sphere packing in Lean](https://thefundamentaltheor3m.github.io/Sphere-Packing-Lean/)
-* [Localic Caratheodory extensions](https://bergschaf.github.io/Localic-Caratheodory-Extensions)
-* [Banach Tarski](https://bergschaf.github.io/lean-banach-tarski)
-* [Bourgain extractor in Lean](https://github.com/Command-Master/lean-bourgain)
-* [Semi circle Law](https://fredraj3.github.io/SemicircleLaw/)
-* [Seymour](https://ivan-sergeyev.github.io/seymour/)
-* [STIR verification](https://leastauthority.github.io/STIR/)
-* [Central limit theorem](https://remydegenne.github.io/CLT/blueprint/)
-* [Brownian motion](https://remydegenne.github.io/brownian-motion/)
-* [Formally Verified Arguments of Knowledge](https://verified-zkevm.github.io/ArkLib/blueprint/)
-* [Chandra Furst Lipton](https://yaeldillies.github.io/ChandraFurstLipton/)
-* [Cambridge combinatorics](https://yaeldillies.github.io/LeanCamCombi/)
-* [Toric varieties in Lean](https://yaeldillies.github.io/Toric/)
-* [Iwasaw theory in Lean](https://acmepjz.github.io/lean-iwasawa/)
-* [Irrationality of ζ(3)](https://ahhwuhu.github.io/zeta_3_irrational/blueprint/)
-* [Exceptional set in the abc conjecture](https://b-mehta.github.io/ABC-Exceptions/)
-* [Analysis in Bonn](https://florisvandoorn.com/BonnAnalysis/blueprint/)
-* [Extreme Value Distribution Project](https://kkytola.github.io/ExtremeValueProject/)
-* [Formal proofs from the book](https://firsching.ch/FormalBook/)
-* [Spectral theorem](https://oliver-butterley.github.io/SpectralThm/)
-* [Sphere packing](https://thefundamentaltheor3m.github.io/Sphere-Packing-Lean/)
-* [Radii Polynomial](https://ilpreterosso.github.io/LEANearized-RadiiPolynomial/)
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     YOUR LEAN PROJECT                               │
+│  import Dress                                                       │
+│  @[blueprint "thm:foo"] theorem foo : ... := ...                   │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              │ lake build (with marker file)
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                         DRESS                                       │
+│  Generates artifacts during Lean elaboration:                       │
+│  • .lake/build/dressed/{Module}.json (highlighting data)            │
+│  • .lake/build/blueprint/module/{Module}.tex (LaTeX + hover data)   │
+│  • .lake/build/blueprint/library/{Library}.tex (index)              │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Consumes artifacts
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    LEANBLUEPRINT (this tool)                        │
+│                                                                     │
+│  • Parses LaTeX with embedded base64 HTML/JSON                      │
+│  • Renders interactive web pages with:                              │
+│    - Syntax-highlighted Lean code                                   │
+│    - Hover tooltips showing types                                   │
+│    - Expandable/collapsible proofs                                  │
+│    - Dependency graph visualization                                 │
+│  • Generates PDF via LaTeX compilation                              │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-## Side-by-Side Display (Experimental)
+## Features
 
-This fork renders Lean code alongside LaTeX theorem statements, providing a unified view of formal and informal mathematics.
+### Side-by-Side Display
 
-**Features:**
+Renders Lean code alongside LaTeX theorem statements:
 
-- **SubVerso JSON rendering** via `subverso_render.py` - converts SubVerso output to syntax-highlighted HTML
-- **Semantic highlighting** - CSS classes for Lean tokens: `lean-keyword`, `lean-const`, `lean-var`, `lean-string`, `lean-docstring`, `lean-sort`
-- **Lexical highlighting** - comments (`-- ...`), numbers, and mathematical operators
-- **Rainbow brackets** - 6-color depth cycling (`lean-bracket-1` through `lean-bracket-6`) for matching parentheses, brackets, and braces
-- **Proof toggle synchronization** - LaTeX proof expand/collapse toggles sync with Lean proof body visibility
-- **CSS grid layout** - 75ch fixed width for LaTeX column, flexible width for Lean column
+- **Pre-rendered HTML** — Dress embeds base64-encoded HTML directly in `.tex` files
+- **Semantic highlighting** — CSS classes for Lean tokens: keywords, constants, variables, strings, docstrings, sorts
+- **Hover tooltips** — Type information displayed on mouseover
+- **Proof toggle** — Expand/collapse proof bodies independently
+- **Rainbow brackets** — 6-color depth cycling for matching brackets
 
-**Requirements:**
+### Dependency Graph
 
-This feature requires the companion fork [e-vergo/LeanArchitect](https://github.com/e-vergo/LeanArchitect) to generate the SubVerso JSON files.
+Interactive SVG graph showing:
+- Node states: stated, proved, not ready, defined, fully proved
+- Clickable nodes linking to declarations
+- Color-coded by formalization status
 
 ## Installation
 
-This package depends on `plastexdepgraph` which requires graphviz and its development libraries. 
-If you have a user-friendly OS, it is as simple as 
-`sudo apt install graphviz libgraphviz-dev`. 
-See https://pygraphviz.github.io/documentation/stable/install.html otherwise.
+### Prerequisites
 
-Then, assuming you have a sane python environment, you only need to run:
+graphviz and its development libraries:
+
+```bash
+# Ubuntu/Debian
+sudo apt install graphviz libgraphviz-dev
+
+# macOS
+brew install graphviz
 ```
+
+### Install leanblueprint
+
+```bash
 pip install leanblueprint
 ```
-Note this will automatically install plasTeX and the other needed python
-packages.
 
-## Upgrading
+Or install from this fork for side-by-side display:
 
-```
-pip install -U leanblueprint
+```bash
+pip install git+https://github.com/e-vergo/leanblueprint.git
 ```
 
-will upgrade to the latest version.
+## Quick Start
 
-## Starting a blueprint
+### 1. Set up your Lean project with Dress
 
-This package provides a command line tool `leanblueprint` that automates in
-particular the creation of a blueprint for your Lean project. This tool is not
-mandatory in any way. Its goal is to make it easy to create a blueprint without
-worrying about choosing a file layout or a continuous integration and deployment
-setup. As every one–size-fits-all tool, it is fairly opinionated. It assumes in
-particular that your project repository is hosted on Github and you want to host
-its blueprint on github.io.
+Add to `lakefile.toml`:
 
-If you don’t want to use the `leanblueprint` command line tool, you can use
-this plugin as any other plasTeX plugin, using
-`plastex --plugins leanblueprint my_file.tex` (not recommended).
-
-In order to use the `leanblueprint` tool, you need to already have a Lean
-project created using lake. In addition, your blueprint will be easier to
-configure if you have at least one commit in the git repository of your project
-and you have already configured its GitHub git remote (GitHub displays
-instructions allowing to do the remote setup when you create a new repository
-there). You should also tell GitHub that you want to use GitHub pages using
-GitHub actions. You can do that from the GitHub page of your repository by
-clicking on the Settings tab in the top menu, then the Pages link in the side
-menu and selecting GitHub Actions as the source, as in the following
-screenshot.
-
-![GitHub pages settings](github_settings.png)
-
-Assuming your project is ready and GitHub is configured, from your project
-folder run 
+```toml
+[[require]]
+name = "Dress"
+git = "https://github.com/e-vergo/Dress"
+rev = "main"
 ```
+
+### 2. Mark declarations with `@[blueprint]`
+
+```lean
+import Dress
+
+@[blueprint "thm:my-theorem"]
+theorem myTheorem : 2 + 2 = 4 := rfl
+```
+
+### 3. Create blueprint structure
+
+```bash
 leanblueprint new
 ```
-You will then have to answer some questions to configure your blueprint. If
-unsure, accept all default answers by simply hitting Enter for each question.
-Only two questions will insist on having an explicit y/n answer: the question
-confirming you want to create the blueprint and the one proposing to commit
-to your git repository.
 
-After running this creation script, you can push to GitHub and wait
-for GitHub Actions to build your blueprint. You can monitor this task 
-in the Actions tab of the GitHub page of your repository. 
-When building is done, the html version of your blueprint will be deployed to 
-`https://user_name.github.io/repo_name/blueprint/` (with the appropriate
-user or organization name and repository name). The pdf version will be at 
-`https://user_name.github.io/repo_name/blueprint.pdf`.
-The API documentation will be at `https://user_name.github.io/repo_name/docs/`.
+### 4. Build artifacts and blueprint
 
-## Local compilation
+```bash
+# Generate Dress artifacts
+mkdir -p .lake/build
+echo "1" > .lake/build/.dress
+lake build
+rm .lake/build/.dress
 
-Assuming you used the `leanblueprint` command line tool to create your blueprint
-(or at least that you use the same file layout), you can use `leanblueprint` to
-build your blueprint locally. The available commands are:
+# Generate library index
+lake build :blueprint
 
-* `leanblueprint pdf` to build the pdf version (this requires a TeX installation
-  of course).
-* `leanblueprint web` to build the web version
-* `leanblueprint checkdecls` to check that every Lean declaration name that appear
-  in the blueprint exist in the project (or in a dependency of the project such
-  as Mathlib). This requires a compiled Lean project, so make sure to run `lake build` beforehand.
-* `leanblueprint all` to run the previous three commands.
-* `leanblueprint serve` to start a local webserver showing your local blueprint
-  (this sounds silly but web browsers paranoia makes it impossible to simply
-  open the generated html pages without serving them). The url you should use
-  in your browser will be displayed and will probably be `http://0.0.0.0:8000/`,
-  unless the port 8000 is already in use.
-
-Note: plasTeX does not call BibTeX. If you have a bibliography, you should use
-`leanblueprint pdf` before `leanblueprint web` to get it to work in the web
-version (and redo it when you add a reference).
-
-## Editing the blueprint
-
-Assuming you used the `leanblueprint` command line tool to create your blueprint
-(or at least that you use the same file layout), the source of your blueprint
-will be in the `blueprint/src` subfolder of your Lean project folder.
-
-Here you will find two main TeX files: `web.tex` and `print.tex`. The first one
-is intended for plasTeX while the second one is intended for a traditional TeX
-compiler such as `xelatex` or `lualatex`. 
-Each of them includes `macros/common.tex` for all TeX macros that make sense
-for both kinds of outputs (this should be most of your macros). 
-Macros that should behave differently depending on the target format should go
-to either `macros/web.tex` or `macros/print.tex`. All those files already exist
-and contains comments reminding you about the above explanations.
-
-The main content of your blueprint should live in `content.tex` (or in files
-imported in `content.tex` if you want to split your content).
-
-The main TeX macros that relate your TeX code to your Lean code are:
-
-* `\lean` that lists the Lean declaration names corresponding to the surrounding
-  definition or statement (including namespaces).
-* `\leanok` which claims the surrounding environment is fully formalized. Here
-  an environment could be either a definition/statement or a proof.
-* `\uses` that lists LaTeX labels that are used in the surrounding environment.
-  This information is used to create the dependency graph. Here
-  an environment could be either a definition/statement or a proof, depending on
-  whether the referenced labels are necessary to state the definition/theorem
-  or only in the proof.
-
-The example below show those essential macros in action, assuming the existence of
-LaTeX labels `def:immersion`, `thm:open_ample` and `lem:open_ample_immersion` and
-assuming the existence of a Lean declaration `sphere_eversion`.
-
-```latex
-\begin{theorem}[Smale 1958]
-  \label{thm:sphere_eversion}
-  \lean{sphere_eversion}
-  \leanok
-  \uses{def:immersion}
-  There is a homotopy of immersions of $𝕊^2$ into $ℝ^3$ from the inclusion map to
-  the antipodal map $a : q ↦ -q$.
-\end{theorem}
-  
-\begin{proof}
-  \leanok
-  \uses{thm:open_ample, lem:open_ample_immersion}
-  This obviously follows from what we did so far.
-\end{proof}
+# Build website and PDF
+cd blueprint
+leanblueprint pdf
+leanblueprint web
+leanblueprint serve  # View at http://localhost:8000
 ```
 
-Note that the proof above is abbreviated in this documentation. 
-Be nice to you and your collaborators and include more details in your blueprint proofs!
+## Commands
 
-By default, the dependency graph will collect the environments definition,
-lemma, proposition, theorem and corollary. You can change this list using the
-`thms` option which expects a list of environment names separated by `+` signs. 
-For instance you can write
+| Command | Description |
+|---------|-------------|
+| `leanblueprint new` | Create blueprint structure for a Lean project |
+| `leanblueprint pdf` | Build PDF (requires TeX installation) |
+| `leanblueprint web` | Build HTML website |
+| `leanblueprint serve` | Start local server to view blueprint |
+| `leanblueprint checkdecls` | Verify Lean declarations exist |
+| `leanblueprint all` | Run pdf, web, and checkdecls |
+
+## LaTeX Macros
+
+### From Dress Artifacts
+
+These macros are automatically generated by Dress and should not be written manually:
+
+| Macro | Purpose |
+|-------|---------|
+| `\leansourcehtml{base64}` | Pre-rendered HTML for full code |
+| `\leansignaturesourcehtml{base64}` | Pre-rendered HTML for signature |
+| `\leanproofsourcehtml{base64}` | Pre-rendered HTML for proof body |
+| `\leanhoverdata{base64}` | Hover tooltip data (JSON) |
+| `\leansource{base64}` | SubVerso JSON (fallback) |
+
+### Manual Macros
+
+For declarations not using Dress, or for additional annotations:
+
+| Macro | Purpose |
+|-------|---------|
+| `\lean{name}` | Link to Lean declaration |
+| `\leanok` | Mark as fully formalized |
+| `\uses{label1, label2}` | Declare dependencies |
+| `\notready` | Mark as not ready for formalization |
+| `\discussion{issue_number}` | Link to GitHub issue |
+| `\proves{label}` | Link proof to statement (when separated) |
+| `\mathlibok` | Mark as merged into Mathlib |
+
+### Including Dress Output
+
 ```latex
-\usepackage[thms=dfn+lem+prop+thm+cor]{blueprint}
+% Include library index (required for \inputleanmodule to work)
+\input{../../.lake/build/blueprint/library/MyProject.tex}
+
+% Include entire module
+\inputleanmodule{MyProject.MyModule}
+
+% Include single declaration
+\inputleannode{thm:my-theorem}
 ```
-if you like short environment names. See the 
-[plastexdepgraph documentation](https://github.com/PatrickMassot/plastexdepgraph/blob/master/README.md) 
-for other dependency graph options having nothing to do with Lean.
-Note that this is giving the `depgraph` package options directly when loading
-the `blueprint` package. Do not load the `depgraph` package separately.
 
+## Blueprint Configuration
 
-The above macros are by far the most important, but there are a couple more.
+In `blueprint/src/web.tex`:
 
-* `\notready` which claims the surrounding environment is not ready to be formalized,
-  typically because it requires more blueprint work.
-* `\discussion` gives a GitHub issue number where the surrounding definition or
-  statement is discussed.
-* `\proves` inside a proof environment gives the LaTeX label of the LaTeX
-  statement being proved. This is necessary only when the proof does not
-  immediately follow the statement.
-* `\mathlibok` marks nodes that were already merged into mathlib.
+```latex
+\documentclass{report}
+\usepackage[
+  showmore,           % Enable expand/collapse
+  dep_graph,          % Enable dependency graph
+  coverage,           % Show coverage stats
+  project=../../,     % Path to Lean project root
+  thms=definition+lemma+proposition+theorem+corollary
+]{blueprint}
 
-## Blueprint configuration
+\home{https://example.github.io/myproject/}
+\github{https://github.com/example/myproject}
+\dochome{https://example.github.io/myproject/docs}
 
-Most of the configuration is handled during the blueprint creation if you used
-the `leanblueprint` client. But some of it can be changed by LaTeX macros
-in the web version of LaTeX preamble (in the file `web.tex` if you use the
-default layout).
+\input{blueprint.tex}
+\end{document}
+```
 
-* `\home{url}` defines the url of the home page of the project.
-* `\github{url}` defines the url of the git repository of the project.
-* `\dochome{url}` defines the url of the doc-gen API documentation of the
-  project.
-* `\graphcolor{node_type}{color}{description}` sets a color in the dependency
-  graph and its description in the legend. The default values are
-    * `stated`, `green`, `Green`
-    * `can_state`, `blue`, `Blue`
-    * `not_ready`, `#FFAA33`, `Orange`
-    * `proved`, `#9CEC8B`, `Green`
-    * `can_prove`, `#A3D6FF`, `Blue`
-    * `defined`, `#B0ECA3`, `Light green`
-    * `fully_proved`, `#1CAC78`, `Dark green`
-    * `mathlib`, `darkgreen`, `Dark green`
+### Graph Colors
 
-    In particular you can use the above color descriptions to interpret the node
-    type by comparison with the default legend.
+Customize dependency graph colors:
+
+```latex
+\graphcolor{proved}{#9CEC8B}{Proved}
+\graphcolor{stated}{green}{Stated}
+\graphcolor{not_ready}{#FFAA33}{Not ready}
+```
+
+## CSS Classes
+
+For custom styling of Lean code:
+
+| Class | Element |
+|-------|---------|
+| `lean-keyword` | `theorem`, `def`, `by`, etc. |
+| `lean-const` | Constants and definitions |
+| `lean-var` | Variables and parameters |
+| `lean-string` | String literals |
+| `lean-docstring` | Documentation comments |
+| `lean-comment` | Regular comments |
+| `lean-number` | Numeric literals |
+| `lean-operator` | Mathematical operators |
+| `lean-bracket-1` through `lean-bracket-6` | Rainbow brackets |
+
+## GitHub Actions
+
+Add to your workflow:
+
+```yaml
+- name: Build blueprint
+  run: |
+    mkdir -p .lake/build
+    echo "1" > .lake/build/.dress
+    lake build
+    rm .lake/build/.dress
+    lake build :blueprint
+    cd blueprint
+    leanblueprint pdf
+    leanblueprint web
+```
+
+## Example Projects
+
+Projects using leanblueprint:
+
+- [Sphere Eversion Project](https://leanprover-community.github.io/sphere-eversion/blueprint/)
+- [Polynomial Freiman-Ruzsa Conjecture](https://teorth.github.io/pfr/blueprint/)
+- [Fermat's Last Theorem](https://imperialcollegelondon.github.io/FLT/blueprint/)
+- [Prime Number Theorem](https://alexkontorovich.github.io/PrimeNumberTheoremAnd/web/)
+
+See the full list in the [upstream README](https://github.com/PatrickMassot/leanblueprint).
+
+## Related Projects
+
+- **[Dress](https://github.com/e-vergo/Dress)** — Artifact generator (required for side-by-side display)
+- **[LeanArchitect](https://github.com/e-vergo/LeanArchitect)** — `@[blueprint]` attribute (included in Dress)
+- **[Original leanblueprint](https://github.com/PatrickMassot/leanblueprint)** — Upstream project
+
+## License
+
+Apache 2.0 — see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-The continuous integration configuration template used by `leanblueprint new`
-is based on the work of many people who had to write such a configuration by
-hand in the past, including Yakov Pechersky, Ben Toner, Sky Wilshaw, Yaël Dillies
-and Utensil Song. It also got contributions from Pietro Monticone.
+Based on [PatrickMassot/leanblueprint](https://github.com/PatrickMassot/leanblueprint). The original infrastructure was created for the [Sphere Eversion Project](https://leanprover-community.github.io/sphere-eversion/) and has been used by many formalization projects since.
