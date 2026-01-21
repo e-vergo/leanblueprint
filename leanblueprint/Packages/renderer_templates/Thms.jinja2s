@@ -62,7 +62,7 @@ name: thmenv
         {{ context.terms['proof'] }}
         {% endif %}
         </span>
-        <span class="expand-proof">{{ doc.userdata.get('expand-proof_default_content', '▼') }}</span>
+        <span class="expand-proof">{{ doc.userdata.get('expand-proof_default_content', '▶') }}</span>
       </div>
       <div class="proof_content">
       {{ proof_obj }}
@@ -93,11 +93,11 @@ name: thmenv
     setTimeout(function() {
       var icon = container.querySelector('.expand-proof');
       var isCollapsed = icon && icon.textContent.trim() === '▶';
-      // Toggle collapsed class for smooth CSS animation
+      // Use jQuery slideUp/slideDown to match LaTeX proof animation
       if (isCollapsed) {
-        leanProofBody.classList.add('collapsed');
+        $(leanProofBody).slideUp(300);
       } else {
-        leanProofBody.classList.remove('collapsed');
+        $(leanProofBody).slideDown(300);
       }
     }, 50);
   });

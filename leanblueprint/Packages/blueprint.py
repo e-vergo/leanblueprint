@@ -184,6 +184,29 @@ class discussion(Command):
             'issue', self.attributes['issue'].lstrip('#').strip())
 
 
+class leanposition(Command):
+    r"""\leanposition{file|startLine|startCol|endLine|endCol}
+
+    Source position metadata for linking to the Lean source file.
+    Format: absolute_path|start_line|start_col|end_line|end_col
+    """
+    args = 'position:str'
+
+    def digest(self, tokens):
+        Command.digest(self, tokens)
+        pos_str = self.attributes['position']
+        # Parse the pipe-separated position data
+        parts = pos_str.split('|')
+        if len(parts) == 5:
+            self.parentNode.setUserData('lean_position', {
+                'file': parts[0],
+                'start_line': int(parts[1]),
+                'start_col': int(parts[2]),
+                'end_line': int(parts[3]),
+                'end_col': int(parts[4])
+            })
+
+
 class leansource(Command):
     r"""\leansource{base64_encoded_json}"""
     args = 'source:str'

@@ -66,24 +66,25 @@ div.content-wrapper {
   opacity: 1;
 }
 
-/* Proof body starts expanded (matching ▼ icon default state) */
-/* Using max-height/opacity for smooth animation instead of display:none */
+/* Lean proof body starts collapsed (matching ▶ icon default state) */
+/* jQuery slideUp/slideDown handles the animation */
 .lean-proof-body {
-  display: block;
-  max-height: 5000px;  /* Large enough for any proof - starts expanded */
-  opacity: 1;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
-}
-
-.lean-proof-body.collapsed {
-  max-height: 0;
-  opacity: 0;
-  transition: max-height 0.4s ease-in, opacity 0.3s ease-in;
+  display: none;
 }
 
 /* Hide old sequential panel */
 .thm_body_extras {
+  display: none;
+}
+
+/* Prevent showmore.js from hiding inline proofs in SBS layout */
+/* These proofs are rendered inline with their theorems and should always be visible */
+.proof_wrapper.proof_inline {
+  display: block !important;
+}
+
+/* Start inline proof content collapsed (matching ▶ icon default state) */
+.proof_wrapper.proof_inline .proof_content {
   display: none;
 }
 

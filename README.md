@@ -48,8 +48,20 @@ Renders Lean code alongside LaTeX theorem statements:
 - **Pre-rendered HTML** — Dress embeds base64-encoded HTML directly in `.tex` files
 - **Semantic highlighting** — CSS classes for Lean tokens: keywords, constants, variables, strings, docstrings, sorts
 - **Hover tooltips** — Type information displayed on mouseover
-- **Proof toggle** — Expand/collapse proof bodies independently
 - **Rainbow brackets** — 6-color depth cycling for matching brackets
+
+### Synchronized Proof Toggle
+
+The proof toggle provides a unified experience for expanding/collapsing proofs:
+
+- **Single toggle control** — Click "Proof ▶" to expand both LaTeX and Lean proofs simultaneously
+- **Smooth animations** — Both proof sections animate with jQuery slideUp/slideDown (300ms)
+- **Start collapsed** — Proofs begin collapsed to reduce visual clutter; signatures always visible
+- **Independent of showmore** — Inline proofs in side-by-side layout ignore the global showmore level
+
+The Lean code column shows:
+- **Signature** (always visible) — The theorem statement up to `:= by`
+- **Proof body** (toggleable) — The tactic proof, synced with LaTeX proof visibility
 
 ### Dependency Graph
 
@@ -230,6 +242,17 @@ For custom styling of Lean code:
 | `lean-number` | Numeric literals |
 | `lean-operator` | Mathematical operators |
 | `lean-bracket-1` through `lean-bracket-6` | Rainbow brackets |
+
+### Layout Classes
+
+| Class | Element |
+|-------|---------|
+| `sbs-container` | Grid container for side-by-side layout |
+| `sbs-latex-column` | Left column (LaTeX theorem + proof) |
+| `sbs-lean-column` | Right column (Lean code) |
+| `lean-signature` | Lean theorem signature (always visible) |
+| `lean-proof-body` | Lean proof body (toggleable) |
+| `proof_wrapper.proof_inline` | Inline proof in SBS layout (not hidden by showmore) |
 
 ## GitHub Actions
 
