@@ -18,9 +18,10 @@ leanblueprint is the **presentation layer** in the blueprint toolchain:
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         DRESS                                       │
 │  Generates artifacts during Lean elaboration:                       │
-│  • .lake/build/dressed/{Module}.json (highlighting data)            │
-│  • .lake/build/blueprint/module/{Module}.tex (LaTeX + hover data)   │
-│  • .lake/build/blueprint/library/{Library}.tex (index)              │
+│  • .lake/build/dressed/{Module/Path}/module.json (highlighting)     │
+│  • .lake/build/dressed/{Module/Path}/module.tex (LaTeX + hover)     │
+│  • .lake/build/dressed/{Module/Path}/{label}/decl.{tex,html,json}   │
+│  • .lake/build/dressed/library/{Library}.tex (index)                │
 └─────────────────────────────────────────────────────────────────────┘
                               │
                               │ Consumes artifacts
@@ -173,7 +174,7 @@ For declarations not using Dress, or for additional annotations:
 
 ```latex
 % Include library index (required for \inputleanmodule to work)
-\input{../../.lake/build/blueprint/library/MyProject.tex}
+\input{../../.lake/build/dressed/library/MyProject.tex}
 
 % Include entire module
 \inputleanmodule{MyProject.MyModule}
