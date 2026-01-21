@@ -92,6 +92,11 @@ class Lakefile(ABC):
         """Update the lakefile to add a requirement for docgen"""
         pass
 
+    @abstractmethod
+    def add_dress(self) -> None:
+        """Update the lakefile to add a requirement for Dress"""
+        pass
+
 class LakefileLean(Lakefile):
     def __init__(self, lakefile_lean: Path):
         super().__init__(lakefile_lean)
@@ -128,6 +133,11 @@ class LakefileLean(Lakefile):
                 require «doc-gen4» from git
                   "https://github.com/leanprover/doc-gen4" @ "main"'''))
 
+    def add_dress(self) -> None:
+        """see `super.add_dress`"""
+        with self.path.open("a", encoding="utf8") as lf:
+            lf.write('\nrequire Dress from git "https://github.com/e-vergo/Dress" @ "main"')
+
 class LakefileToml(Lakefile):
     def __init__(self, lakefile_toml: Path):
         self._file = TOMLFile(lakefile_toml)
@@ -153,6 +163,10 @@ class LakefileToml(Lakefile):
     def add_docgen(self) -> None:
         """see `super.add_docgen`"""
         self._add_require("«doc-gen4»", "https://github.com/leanprover/doc-gen4", rev="main")
+
+    def add_dress(self) -> None:
+        """see `super.add_dress`"""
+        self._add_require("Dress", "https://github.com/e-vergo/Dress", rev="main")
 
     def _add_require(self, name:str, git:str, rev:Optional[str] = None) -> None:
         """Add a [[require]] to self._toml and dump it"""
@@ -255,7 +269,9 @@ else:
 blueprint_root = Path(repo.working_dir)/"blueprint"
 
 @cli.command()
-def new() -> None:
+@click.option('--with-dress', 'with_dress', default=False, is_flag=True,
+              help='Include Dress for syntax-highlighted Lean code.')
+def new(with_dress: bool) -> None:
     """
     Create a new Lean blueprint in the given repository.
     """
@@ -404,7 +420,12 @@ def new() -> None:
         console.print("Ok, lakefile is edited. Will now get the doc-gen library.")
         subprocess.run("lake -R -Kenv=dev update doc-gen4",
                        cwd=str(blueprint_root.parent), check=False, shell=True)
-        
+
+    if with_dress:
+        console.print("\nDress setup", style="title")
+        lakefile.add_dress()
+        subprocess.run("lake update Dress", cwd=str(blueprint_root.parent), check=False, shell=True)
+
     home_page_created = False
 
     if confirm("Do you want to create a home page for the project, "
@@ -545,6 +566,21 @@ def serve() -> None:
         pass
     httpd.server_close()
     os.chdir(cwd)
+
+
+@cli.command()
+def setup_dress() -> None:
+    """
+    Add Dress dependency for syntax-highlighted Lean code in blueprint.
+    """
+    assert lakefile is not None
+    console.print("\nSetting up Dress\n", style="title")
+    if not confirm("Add Dress requirement to lakefile?", default=True):
+        error("Aborting.")
+    lakefile.add_dress()
+    console.print("Lakefile updated. Fetching Dress...")
+    subprocess.run("lake update Dress", cwd=str(blueprint_root.parent), check=False, shell=True)
+    console.print("\nDress setup complete!", style="title")
 
 
 def safe_cli():
