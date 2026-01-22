@@ -96,14 +96,14 @@ div.content-wrapper {
 }
 
 /* SubVerso Lean Syntax Highlighting - VSCode-inspired colors */
-/* Both leanblueprint classes (lean-*) and Verso classes (bare names) are supported */
+/* Supports: leanblueprint classes (lean-*), Verso wrapped (.hl.lean .X), and Verso bare (.X.token) */
 
 /* Keywords: def, theorem, if, then, etc. */
-.lean-keyword, .hl.lean .keyword { color: #0000ff; }
+.lean-keyword, .hl.lean .keyword, .keyword.token { color: #0000ff; }
 
 /* Constants and functions */
-.lean-const, .hl.lean .const { color: #AF8700; }
-.lean-const.lean-def, .hl.lean .const[data-defining="true"] {
+.lean-const, .hl.lean .const, .const.token { color: #AF8700; }
+.lean-const.lean-def, .hl.lean .const[data-defining="true"], .const.token[data-defining="true"] {
   font-weight: bold;
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -111,47 +111,55 @@ div.content-wrapper {
 }
 
 /* Local variables */
-.lean-var, .hl.lean .var { color: #0070C1; }
+.lean-var, .hl.lean .var, .var.token { color: #0070C1; }
 
 /* Hover styling for tokens with type info */
 .lean-const[title],
 .lean-var[title],
 .lean-keyword[title],
-.lean-sort[title] {
+.lean-sort[title],
+.const.token[title],
+.var.token[title],
+.keyword.token[title],
+.sort.token[title] {
   cursor: help;
 }
 
 .lean-const[title]:hover,
-.lean-var[title]:hover {
+.lean-var[title]:hover,
+.const.token[title]:hover,
+.var.token[title]:hover {
   background-color: rgba(0, 0, 0, 0.05);
   border-radius: 2px;
 }
+
 /* String literals - "literal string" in Verso */
-.lean-string, .hl.lean .literal.string { color: #a31515; }
+.lean-string, .hl.lean .literal.string, .literal.string.token { color: #a31515; }
 
 /* Options */
-.lean-option, .hl.lean .option { color: #795e26; }
+.lean-option, .hl.lean .option, .option.token { color: #795e26; }
 
 /* Doc comments */
-.lean-docstring, .hl.lean .doc-comment { color: #008000; font-style: italic; }
+.lean-docstring, .hl.lean .doc-comment, .doc-comment.token { color: #008000; font-style: italic; }
 
 /* Sorts: Type, Prop, Sort */
-.lean-sort, .hl.lean .sort { color: #267f99; }
+.lean-sort, .hl.lean .sort, .sort.token { color: #267f99; }
 
 /* Universe levels */
-.lean-level, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op { color: #098658; }
+.lean-level, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op,
+.level-var.token, .level-const.token, .level-op.token { color: #098658; }
 
 /* Module names */
-.lean-module, .hl.lean .module-name { color: #795e26; }
+.lean-module, .hl.lean .module-name, .module-name.token { color: #795e26; }
 
 /* Typed expressions */
-.lean-expr, .hl.lean .typed { color: inherit; }
+.lean-expr, .hl.lean .typed, .typed.token { color: inherit; }
 
 /* Plain text and unknown tokens */
-.lean-text, .hl.lean .unknown, .hl.lean .inter-text { color: inherit; }
+.lean-text, .hl.lean .unknown, .hl.lean .inter-text, .unknown.token, .inter-text { color: inherit; }
 
 /* Sorry */
-.lean-sorry { color: #ff0000; background-color: #ffeaea; font-weight: bold; }
+.lean-sorry, .sorry.token { color: #ff0000; background-color: #ffeaea; font-weight: bold; }
 
 /* Lexical token highlighting (regex-based) */
 .lean-number { color: #098658; }  /* Green - numbers */
