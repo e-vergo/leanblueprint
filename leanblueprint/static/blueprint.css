@@ -237,3 +237,20 @@ div.content-wrapper {
   color: #c82829;
   font-style: italic;
 }
+
+/* Hover tooltips for Lean code */
+.lean-hover-tooltip {
+  position: absolute;
+  z-index: 1000;
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 12px;
+  max-width: 600px;
+  font-family: monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
