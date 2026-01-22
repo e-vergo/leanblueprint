@@ -13,18 +13,25 @@ div.content-wrapper {
 /* Side-by-side container for theorem/definition + Lean code */
 .sbs-container {
   display: grid;
-  grid-template-columns: 75ch 1fr;  /* Standard blueprint width for LaTeX, rest for Lean */
+  grid-template-columns: minmax(75ch, 75ch) minmax(0, 1fr);  /* Fixed LaTeX, flexible Lean */
   gap: 3rem;  /* Gap between LaTeX and Lean columns */
   align-items: start;
   margin-bottom: 3rem;  /* Vertical spacing between declarations */
   margin-left: 3rem;  /* Match gap from sidebar */
 }
 
-.sbs-latex-column,
+.sbs-latex-column {
+  width: 75ch;
+  max-width: 75ch;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
 .sbs-lean-column {
   min-width: 0;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  overflow-x: auto;  /* Scroll long lines instead of pushing layout */
 }
 
 /* Lean code - plain styling on page background */
