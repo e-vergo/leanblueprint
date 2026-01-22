@@ -254,3 +254,334 @@ div.content-wrapper {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+/* ========== Verso-style Interactive Features ========== */
+
+/* Token binding highlight - when hovering over a variable, highlight all occurrences */
+.hl.lean .token.binding-hl {
+  background-color: rgba(255, 255, 0, 0.3);
+  border-radius: 2px;
+}
+
+/* Hover info container */
+.hl.lean .hover-info {
+  display: block;
+  padding: 8px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+}
+
+.hl.lean .hover-info code {
+  font-family: inherit;
+}
+
+/* Separator between signature and docstring */
+.hl.lean .sep {
+  display: block;
+  height: 1px;
+  background-color: #ccc;
+  margin: 8px 0;
+}
+
+/* Docstring styling */
+.hl.lean .docstring {
+  color: #666;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+.hl.lean .docstring p {
+  margin: 0.5em 0;
+}
+
+.hl.lean .docstring code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+/* Extra documentation links */
+.extra-doc-links {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+  margin-top: 8px;
+  border-top: 1px solid #ccc;
+  padding-top: 8px;
+}
+
+.extra-doc-links > li {
+  display: inline-block;
+}
+
+.extra-doc-links > li:not(:last-child)::after {
+  content: '|';
+  display: inline-block;
+  margin: 0 0.25em;
+  color: #999;
+}
+
+/* ========== Tippy.js Theme Customization ========== */
+
+/* Ensure tooltips appear above other content */
+[data-tippy-root] {
+  z-index: 99999 !important;
+}
+
+.tippy-box {
+  /* Prevent mobile Safari font size inconsistency */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Lean theme - default for type info hovers */
+.tippy-box[data-theme~='lean'] {
+  background-color: #f5f5f5;
+  color: black;
+  border: 1px solid #333;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tippy-box[data-theme~='lean'] .tippy-content {
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85em;
+}
+
+.tippy-box[data-theme~='lean'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #f5f5f5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #f5f5f5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: #f5f5f5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: #f5f5f5;
+}
+
+/* Warning theme - for warning messages */
+.tippy-box[data-theme~='warning'] {
+  background-color: #fff8e6;
+  color: black;
+  border: 2px solid #f0ad4e;
+  border-radius: 4px;
+}
+
+.tippy-box[data-theme~='warning'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #fff8e6;
+}
+.tippy-box[data-theme~='warning'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #fff8e6;
+}
+
+/* Error theme - for error messages */
+.tippy-box[data-theme~='error'] {
+  background-color: #fff0f0;
+  color: black;
+  border: 2px solid #d9534f;
+  border-radius: 4px;
+}
+
+.tippy-box[data-theme~='error'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #fff0f0;
+}
+.tippy-box[data-theme~='error'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #fff0f0;
+}
+
+/* Info theme - for info messages */
+.tippy-box[data-theme~='info'] {
+  background-color: #f0f8ff;
+  color: black;
+  border: 2px solid #5bc0de;
+  border-radius: 4px;
+}
+
+.tippy-box[data-theme~='info'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #f0f8ff;
+}
+.tippy-box[data-theme~='info'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #f0f8ff;
+}
+
+/* Tactic theme - for tactic state popups */
+.tippy-box[data-theme~='tactic'] {
+  background-color: white;
+  color: black;
+  border: 1px solid #333;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tippy-box[data-theme~='tactic'] .tippy-content {
+  padding: 12px;
+}
+
+.tippy-box[data-theme~='tactic'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: white;
+}
+
+/* Message theme modifier - larger arrows */
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::before {
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::before {
+  border-width: 11px 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::before {
+  border-width: 11px 11px 11px 0;
+}
+
+/* ========== Verso Message Styling ========== */
+
+.verso-message .trace {
+  display: block;
+}
+
+.verso-message .trace > summary::marker {
+  color: inherit;
+}
+
+.verso-message .trace-children {
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .trace-children > li {
+  list-style-type: none;
+  margin-left: 1.5em;
+}
+
+.verso-message .trace-children > li:not(:has(.trace)) {
+  margin-left: 0;
+}
+
+.verso-message .trace-class {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .text {
+  white-space: pre-wrap;
+}
+
+/* ========== Tactic State Display ========== */
+
+/* Hidden checkbox toggle for tactic states */
+.hl.lean input.tactic-toggle {
+  display: none;
+}
+
+/* Tactic state container - hidden by default */
+.hl.lean .tactic-state {
+  display: none;
+}
+
+/* Show tactic state when checkbox is checked */
+.hl.lean input.tactic-toggle:checked + .tactic-state {
+  display: block;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Tactic label styling */
+.hl.lean .tactic > label {
+  cursor: pointer;
+}
+
+/* Tactic indicator dot */
+.hl.lean .tactic::before {
+  content: '\25CF';  /* Bullet */
+  color: #4271ae;
+  font-size: 0.6em;
+  vertical-align: super;
+  margin-right: 2px;
+  opacity: 0.5;
+}
+
+.hl.lean .tactic:hover::before {
+  opacity: 1;
+}
+
+/* Goal display in tactic states */
+.hl.lean .goal {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.hl.lean .goal:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.hl.lean .goal-name {
+  color: #666;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+/* Hypotheses table */
+.hl.lean .hypotheses {
+  display: table;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.hl.lean .hypotheses .hypothesis {
+  display: table-row;
+}
+
+.hl.lean .hypotheses .name {
+  display: table-cell;
+  padding-right: 8px;
+  text-align: right;
+  color: #c82829;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.hl.lean .hypotheses .colon {
+  display: table-cell;
+  padding-right: 8px;
+  color: #666;
+}
+
+.hl.lean .hypotheses .type {
+  display: table-cell;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Goal conclusion */
+.hl.lean .conclusion {
+  margin-top: 8px;
+}
+
+.hl.lean .conclusion .goal-prefix {
+  color: #666;
+  margin-right: 4px;
+}
+
+.hl.lean .conclusion .type {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}

@@ -554,6 +554,14 @@ def ProcessOptions(options, document):
 
     document.addPackageResource([PackageCss(path=STATIC_DIR/'blueprint.css')])
 
+    # Add Verso-style interactive hover JavaScript
+    # Popper.js must be loaded before Tippy.js
+    document.addPackageResource([
+        PackageJs(path=STATIC_DIR/'vendor'/'popper.min.js'),
+        PackageJs(path=STATIC_DIR/'vendor'/'tippy-bundle.umd.min.js'),
+        PackageJs(path=STATIC_DIR/'verso-code.js')
+    ])
+
     colors = document.userdata['dep_graph']['colors'] = {
         'mathlib': ('darkgreen', 'Dark green'),
         'stated': ('green', 'Green'),

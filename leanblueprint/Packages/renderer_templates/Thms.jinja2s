@@ -72,7 +72,7 @@ name: thmenv
   </div>
   {% if obj.userdata.lean_signature_html %}
   <div class="sbs-lean-column">
-    <pre class="lean-code"{% if obj.userdata.lean_hover_data %} data-lean-hovers='{{ obj.userdata.lean_hover_data | replace("'", "&#39;") }}'{% endif %}><code class="lean-signature">{{ obj.userdata.lean_signature_html | safe }}</code>{% if obj.userdata.lean_proof_html %}<code class="lean-proof-body">{{ obj.userdata.lean_proof_html | safe }}</code>{% endif %}</pre>
+    <pre class="lean-code"{% if obj.userdata.lean_hover_data %} data-lean-hovers='{{ obj.userdata.lean_hover_data | replace("'", "&#39;") }}'{% endif %}><code class="hl lean lean-signature">{{ obj.userdata.lean_signature_html | safe }}</code>{% if obj.userdata.lean_proof_html %}<code class="hl lean lean-proof-body">{{ obj.userdata.lean_proof_html | safe }}</code>{% endif %}</pre>
     {% if obj.userdata.lean_github_permalink %}
     <a href="{{ obj.userdata.lean_github_permalink }}" class="lean-github-hover" target="_blank" title="View on GitHub">{{ icon('github') }}</a>
     {% endif %}
@@ -104,62 +104,7 @@ name: thmenv
 })();
 </script>
 {% endif %}
-{% if obj.userdata.lean_hover_data %}
-<script>
-(function() {
-  // Global initialization guard - only run once per page
-  if (window._leanHoverTooltipsInitialized) return;
-  window._leanHoverTooltipsInitialized = true;
-
-  function initHoverTooltips() {
-    // Create tooltip element
-    var tooltip = document.createElement('div');
-    tooltip.className = 'lean-hover-tooltip';
-    tooltip.style.display = 'none';
-    document.body.appendChild(tooltip);
-
-    // Initialize hover tooltips for all .lean-code blocks
-    document.querySelectorAll('.lean-code[data-lean-hovers]').forEach(function(codeBlock) {
-      var hoverData = codeBlock.dataset.leanHovers;
-      if (!hoverData) return;
-
-      var hovers;
-      try {
-        hovers = JSON.parse(hoverData);
-      } catch (e) {
-        console.warn('Failed to parse hover data:', e);
-        return;
-      }
-
-      codeBlock.querySelectorAll('[data-verso-hover]').forEach(function(el) {
-        var hoverId = el.dataset.versoHover;
-        var content = hovers[hoverId];
-        if (!content) return;
-
-        el.addEventListener('mouseenter', function(e) {
-          tooltip.innerHTML = content;
-          tooltip.style.display = 'block';
-          var rect = el.getBoundingClientRect();
-          tooltip.style.left = rect.left + window.scrollX + 'px';
-          tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-        });
-
-        el.addEventListener('mouseleave', function() {
-          tooltip.style.display = 'none';
-        });
-      });
-    });
-  }
-
-  // Wait for DOM to be fully loaded before initializing
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initHoverTooltips);
-  } else {
-    initHoverTooltips();
-  }
-})();
-</script>
-{% endif %}
+{# Hover tooltips are now handled by verso-code.js with Tippy.js #}
 
 name: proof
 {% macro icon(icon, id='', class='') %}
