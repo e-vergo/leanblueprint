@@ -1,5 +1,9 @@
 # leanblueprint
 
+> **Experience Prototype**: This is an experimental fork of [PatrickMassot/leanblueprint](https://github.com/PatrickMassot/leanblueprint) exploring enhanced features for Lean blueprint generation. Key additions include side-by-side LaTeX/Lean display, synchronized proof toggling, rainbow bracket coloring, and integration with [Dress](https://github.com/e-vergo/Dress) for pre-rendered syntax highlighting. Changes may be upstreamed once stable.
+
+---
+
 **leanblueprint** is a [plasTeX](https://github.com/plastex/plastex/) plugin for creating interactive mathematical blueprints for Lean 4 projects. It consumes artifacts from [Dress](https://github.com/e-vergo/Dress) to produce websites with syntax-highlighted Lean code, hover tooltips, expandable proofs, and dependency graphs.
 
 ## Architecture
