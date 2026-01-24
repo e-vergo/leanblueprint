@@ -89,40 +89,52 @@ def _highlight_plain_text(text: str) -> str:
 
 def _renumber_brackets_by_depth(html: str) -> str:
     """
-    Post-process HTML to renumber bracket spans based on actual nesting depth.
+    Post-process HTML to wrap ALL bracket characters with depth-based colors.
 
-    This fixes the issue where brackets in separate SubVerso tokens all get depth 1
-    because the depth counter resets for each token.
+    This handles brackets that come from:
+    1. Plain text (already wrapped in lean-bracket-X spans)
+    2. Semantic tokens (e.g., lean-keyword spans from Dress/Verso)
     """
-    # Pattern to match bracket spans: <span class="lean-bracket-X">Y</span>
-    bracket_span_pattern = re.compile(r'<span class="lean-bracket-\d+">(.)</span>')
+    # First, remove any existing lean-bracket-X wrapper spans
+    # (keeps the bracket character, removes the span)
+    html = re.sub(r'<span class="lean-bracket-\d+">(.)</span>', r'\1', html)
 
+    # Now walk through and wrap all brackets with correct depth
     result = []
     depth = 0
-    last_end = 0
+    i = 0
 
-    for match in bracket_span_pattern.finditer(html):
-        # Add text before this match
-        result.append(html[last_end:match.start()])
+    while i < len(html):
+        # Skip HTML tags entirely
+        if html[i] == '<':
+            tag_end = html.find('>', i)
+            if tag_end != -1:
+                result.append(html[i:tag_end + 1])
+                i = tag_end + 1
+                continue
 
-        bracket_char = match.group(1)
+        # Handle HTML entities (don't treat & as bracket)
+        if html[i] == '&':
+            entity_end = html.find(';', i)
+            if entity_end != -1 and entity_end - i < 10:
+                result.append(html[i:entity_end + 1])
+                i = entity_end + 1
+                continue
 
-        if bracket_char in OPENING_BRACKETS:
+        char = html[i]
+
+        if char in OPENING_BRACKETS:
             depth += 1
             color_index = ((depth - 1) % 6) + 1
-            result.append(f'<span class="lean-bracket-{color_index}">{bracket_char}</span>')
-        elif bracket_char in CLOSING_BRACKETS:
+            result.append(f'<span class="lean-bracket-{color_index}">{char}</span>')
+        elif char in CLOSING_BRACKETS:
             color_index = ((depth - 1) % 6) + 1 if depth > 0 else 1
-            result.append(f'<span class="lean-bracket-{color_index}">{bracket_char}</span>')
+            result.append(f'<span class="lean-bracket-{color_index}">{char}</span>')
             depth = max(0, depth - 1)
         else:
-            # Not a bracket we recognize, keep original
-            result.append(match.group(0))
+            result.append(char)
 
-        last_end = match.end()
-
-    # Add remaining text after last match
-    result.append(html[last_end:])
+        i += 1
 
     return ''.join(result)
 
