@@ -10,14 +10,40 @@ div.content-wrapper {
   max-width: 1800px;  /* Much wider than default 75ch */
 }
 
+/* Main content area uses same grid as theorems for consistent alignment */
+.main-text {
+  display: grid;
+  grid-template-columns: minmax(auto, 75ch) minmax(0, 1fr);
+  gap: 0 3rem;  /* No row gap, 3rem column gap */
+  margin-left: 3rem;
+}
+
+/* Standalone content stays in left column only */
+.main-text > p,
+.main-text > h1,
+.main-text > h2,
+.main-text > h3,
+.main-text > h4,
+.main-text > ul,
+.main-text > ol,
+.main-text > .displaymath,
+.main-text > .thebibliography {
+  grid-column: 1;
+}
+
+/* Side-by-side containers span both columns */
+.main-text > .sbs-container {
+  grid-column: 1 / -1;
+}
+
 /* Side-by-side container for theorem/definition + Lean code */
 .sbs-container {
   display: grid;
-  grid-template-columns: minmax(75ch, 75ch) minmax(0, 1fr);  /* Fixed LaTeX, flexible Lean */
+  grid-template-columns: minmax(auto, 75ch) minmax(0, 1fr);  /* Fixed LaTeX, flexible Lean */
   gap: 3rem;  /* Gap between LaTeX and Lean columns */
   align-items: start;
   margin-bottom: 3rem;  /* Vertical spacing between declarations */
-  margin-left: 3rem;  /* Match gap from sidebar */
+  /* margin-left handled by parent .main-text grid */
 }
 
 .sbs-latex-column {
@@ -37,6 +63,7 @@ div.content-wrapper {
 /* Lean code - plain styling on page background */
 .sbs-lean-column pre.lean-code {
   margin: 0;
+  margin-top: 1.6rem;  /* Align with theorem statement text, not the header line */
   padding: 0;
   background: transparent;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;

@@ -87,6 +87,43 @@ def _highlight_plain_text(text: str) -> str:
     return result
 
 
+def _highlight_comments_in_html(html: str) -> str:
+    """
+    Post-process HTML to highlight line comments (-- ...) that weren't tokenized.
+
+    Line comments are stripped by Lean's parser before SubVerso sees them,
+    so they appear as plain text in the Verso HTML output. This function
+    wraps them with the lean-comment class.
+    """
+    result = []
+    i = 0
+
+    while i < len(html):
+        # Skip HTML tags entirely
+        if html[i] == '<':
+            tag_end = html.find('>', i)
+            if tag_end != -1:
+                result.append(html[i:tag_end + 1])
+                i = tag_end + 1
+                continue
+
+        # Check for line comment start: --
+        if html[i:i+2] == '--':
+            # Find end of line (or end of string, or start of HTML tag)
+            comment_start = i
+            i += 2
+            while i < len(html) and html[i] != '\n' and html[i] != '<':
+                i += 1
+            comment_text = html[comment_start:i]
+            result.append(f'<span class="lean-comment">{comment_text}</span>')
+            continue
+
+        result.append(html[i])
+        i += 1
+
+    return ''.join(result)
+
+
 def _renumber_brackets_by_depth(html: str) -> str:
     """
     Post-process HTML to wrap ALL bracket characters with depth-based colors.

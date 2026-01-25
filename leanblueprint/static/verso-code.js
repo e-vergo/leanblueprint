@@ -224,7 +224,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Watch for plastex.js changing the expand icon text
         var observer = new MutationObserver(function() {
             var isExpanded = expandIcon.textContent.trim() === '\u25BC';
-            leanProofBody.style.display = isExpanded ? 'inline' : 'none';
+            // Use jQuery slideUp/slideDown for smooth animation matching LaTeX proof
+            if (typeof $ !== 'undefined') {
+                if (isExpanded) {
+                    $(leanProofBody).slideDown(300);
+                } else {
+                    $(leanProofBody).slideUp(300);
+                }
+            } else {
+                // Fallback if jQuery not available
+                leanProofBody.style.display = isExpanded ? 'inline' : 'none';
+            }
         });
 
         observer.observe(expandIcon, { childList: true, characterData: true, subtree: true });

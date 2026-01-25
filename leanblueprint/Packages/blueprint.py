@@ -20,7 +20,7 @@ from plasTeX.Logging import getLogger
 from plasTeX.PackageResource import PackageCss, PackageJs, PackageTemplateDir
 from plastexdepgraph.Packages.depgraph import item_kind
 # Note: render_highlighted_base64 removed - Dress artifacts are now required
-from leanblueprint.subverso_render import _renumber_brackets_by_depth
+from leanblueprint.subverso_render import _renumber_brackets_by_depth, _highlight_comments_in_html
 import re
 
 log = getLogger()
@@ -251,8 +251,9 @@ class leansourcehtml(Command):
         try:
             html_bytes = base64.b64decode(self.attributes['source'])
             html_str = html_bytes.decode('utf-8')
-            # Apply rainbow bracket coloring
+            # Apply rainbow bracket coloring and comment highlighting
             html_str = _renumber_brackets_by_depth(html_str)
+            html_str = _highlight_comments_in_html(html_str)
             self.parentNode.setUserData('lean_source_html', html_str)
         except Exception as e:
             raise RuntimeError(f'Failed to decode Dress artifact \\leansourcehtml: {e}') from e
@@ -272,8 +273,9 @@ class leansignaturesourcehtml(Command):
         try:
             html_bytes = base64.b64decode(self.attributes['source'])
             html_str = html_bytes.decode('utf-8')
-            # Apply rainbow bracket coloring
+            # Apply rainbow bracket coloring and comment highlighting
             html_str = _renumber_brackets_by_depth(html_str)
+            html_str = _highlight_comments_in_html(html_str)
             self.parentNode.setUserData('lean_signature_html', html_str)
         except Exception as e:
             raise RuntimeError(f'Failed to decode Dress artifact \\leansignaturesourcehtml: {e}') from e
@@ -293,8 +295,9 @@ class leanproofsourcehtml(Command):
         try:
             html_bytes = base64.b64decode(self.attributes['source'])
             html_str = html_bytes.decode('utf-8')
-            # Apply rainbow bracket coloring
+            # Apply rainbow bracket coloring and comment highlighting
             html_str = _renumber_brackets_by_depth(html_str)
+            html_str = _highlight_comments_in_html(html_str)
             self.parentNode.setUserData('lean_proof_html', html_str)
         except Exception as e:
             raise RuntimeError(f'Failed to decode Dress artifact \\leanproofsourcehtml: {e}') from e
