@@ -292,6 +292,91 @@ See the full list in the [upstream README](https://github.com/PatrickMassot/lean
 - **[LeanArchitect](https://github.com/e-vergo/LeanArchitect)** — `@[blueprint]` attribute (included in Dress)
 - **[Original leanblueprint](https://github.com/PatrickMassot/leanblueprint)** — Upstream project
 
+## Fork Changes
+
+This fork ([e-vergo/leanblueprint](https://github.com/e-vergo/leanblueprint)) extends [PatrickMassot/leanblueprint](https://github.com/PatrickMassot/leanblueprint) with side-by-side LaTeX/Lean display and pre-rendered syntax highlighting via Dress artifacts.
+
+### Diff from upstream
+
+```text
+15 files changed, 2728 insertions(+), 234 deletions(-)
+```
+
+Key additions:
+
+- `leanblueprint/subverso_render.py` — 1065 lines: SubVerso Highlighted JSON to HTML renderer
+- `leanblueprint/static/blueprint.css` — 607 lines: Layout, syntax colors, Tippy themes
+- `leanblueprint/static/verso-code.js` — 242 lines: Hover tooltips, token binding highlights
+- `leanblueprint/static/vendor/` — Tippy.js and Popper.js for hover tooltips
+- `leanblueprint/Packages/renderer_templates/Thms.jinja2s` — Side-by-side grid template
+
+### Architecture changes
+
+**Pre-rendered HTML pipeline**: Dress generates base64-encoded HTML during Lean elaboration. Leanblueprint decodes and post-processes it (bracket coloring, comment highlighting) without runtime SubVerso rendering.
+
+```text
+Dress → .tex with \leansignaturesourcehtml{base64} → leanblueprint decodes → final HTML
+```
+
+**Side-by-side layout**: CSS Grid with fixed 75ch LaTeX column and flexible Lean column:
+
+```css
+.sbs-container {
+  display: grid;
+  grid-template-columns: minmax(auto, 75ch) minmax(0, 1fr);
+  gap: 3rem;
+}
+```
+
+### New LaTeX macros (Dress-generated)
+
+| Macro | Purpose |
+|-------|---------|
+| `\leansignaturesourcehtml{base64}` | Pre-rendered signature HTML |
+| `\leanproofsourcehtml{base64}` | Pre-rendered proof body HTML |
+| `\leanhoverdata{base64}` | JSON map of hover IDs to tooltip HTML |
+| `\leanposition{file\|line\|col\|...}` | Source location for GitHub links |
+
+### Rainbow bracket coloring
+
+Six-color depth cycling applied post-decode via `_renumber_brackets_by_depth()`:
+
+```python
+OPENING_BRACKETS = '([{⟨⟦'
+CLOSING_BRACKETS = ')]}⟩⟧'
+# Colors: purple, blue, cyan, blue, green, red (One Light inspired)
+```
+
+### Synchronized proof toggles
+
+`Thms.jinja2s` renders proofs inline with their theorems. JavaScript observes the expand icon's mutation and syncs the Lean proof body visibility:
+
+```javascript
+var observer = new MutationObserver(function() {
+  var isExpanded = expandIcon.textContent.trim() === '▼';
+  if (isExpanded) $(leanProofBody).slideDown(300);
+  else $(leanProofBody).slideUp(300);
+});
+```
+
+### Hover tooltips
+
+`verso-code.js` implements Tippy.js-based hovers using `data-lean-hovers` JSON embedded per code block. Supports:
+
+- Type signatures and docstrings
+- Token binding highlights (highlight all occurrences of a variable)
+- Themed tooltips for errors/warnings/info/tactics
+
+### CSS token classes
+
+Both leanblueprint-style (`lean-*`) and Verso-style (`.hl.lean .X`) selectors supported:
+
+```css
+.lean-keyword, .hl.lean .keyword, .keyword.token { color: #0000ff; }
+.lean-const, .hl.lean .const, .const.token { color: #AF8700; }
+.lean-var, .hl.lean .var, .var.token { color: #0070C1; }
+```
+
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE) for details.
